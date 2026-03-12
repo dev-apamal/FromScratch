@@ -1,5 +1,8 @@
 import BookCardView from "@/components/bookCardView";
+import FinishedBookCardView from "@/components/finishedBookCardView";
+import ResultBookCardView from "@/components/resultBookCardView";
 import { BookItem } from "@/types/bookItem";
+import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 const myBooks: BookItem[] = Array.from({ length: 10 }, (_, i) => ({
@@ -15,6 +18,12 @@ const myBooks: BookItem[] = Array.from({ length: 10 }, (_, i) => ({
 }));
 
 export default function FinishedView() {
+  const [openBookId, setOpenBookId] = useState<string | null>(null);
+
+  const handleReveal = (id: string) => {
+    setOpenBookId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <ScrollView className="flex-1 bg-pomegranate-50">
       <View className="p-4 gap-4">
@@ -33,15 +42,14 @@ export default function FinishedView() {
         <Text className="text-lg font-semibold text-pomegranate-950 opacity-80">
           Your Bookshelf
         </Text>
-
         {/* Book cards */}
         <View className="gap-2">
           {myBooks.map((book) => (
-            <BookCardView
+            <FinishedBookCardView
               key={book.id}
               book={book}
-              onUpdate={() => console.log(`Update tapped for ${book.title}`)}
-              onDelete={() => console.log(`Delete tapped for ${book.title}`)}
+              isOpen={openBookId === book.id}
+              onReveal={() => handleReveal(book.id)}
             />
           ))}
         </View>

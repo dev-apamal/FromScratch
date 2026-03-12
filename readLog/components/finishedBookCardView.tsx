@@ -1,23 +1,38 @@
 import { BookItem } from "@/types/bookItem";
-import { SymbolView } from "expo-symbols";
-import { View, Text, Image, Pressable } from "react-native";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from "react-native";
 
 type Props = {
   book: BookItem;
-  onUpdate: () => void;
-  onDelete: () => void;
+  isOpen: boolean;
+  onReveal: () => void;
 };
 
 export default function FinishedBookCardView({
   book,
-  onUpdate,
-  onDelete,
+  isOpen,
+  onReveal,
 }: Props) {
-  const progress = book.currentPage / book.pageCount;
+  if (Platform.OS === "android") {
+    UIManager.setLayoutAnimationEnabledExperimental?.(true);
+  }
+
+  const handleReveal = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    onReveal();
+  };
 
   return (
     <View className="w-full">
-      <View className="bg-pomegranate-100 rounded-2xl p-4 w-full gap-4">
+      <View className="bg-pomegranate-100 rounded-2xl p-4 w-full gap-4 overflow-hidden">
         {/* Top row: image + details */}
         <View className="flex-row gap-4 items-start">
           <Image
@@ -62,37 +77,21 @@ export default function FinishedBookCardView({
             </View>
           </View>
         </View>
-
-        {/* Buttons */}
-        <View className="flex-row items-center gap-2">
-          <Pressable
-            onPress={onUpdate}
-            className="flex-1 bg-white rounded-lg py-2 items-center"
-          >
-            <Text className="text-pomegranate-500 text-base">
-              Update Progress
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={onDelete}
-            className="bg-pomegranate-200 rounded-full p-2 items-center justify-center"
-          >
-            <SymbolView
-              name="trash.fill"
-              size={20}
-              tintColor="#f45335" // pomegranate-500
-            />
-          </Pressable>
-        </View>
-
-        {/* Progress bar */}
-        <View className="h-1 bg-pomegranate-200 rounded-full overflow-hidden">
-          <View
-            className="h-full bg-rose-950 rounded-full"
-            style={{ width: `${Math.min(progress * 100, 100)}%` }}
-          />
-        </View>
+        <Pressable
+          onPress={handleReveal}
+          className=" bg-white rounded-lg py-2 items-center"
+        >
+          {isOpen ? (
+            <Text className="text-pomegranate-500 text-base">Close Stats</Text>
+          ) : (
+            <Text className="text-pomegranate-500 text-base">View Stats</Text>
+          )}
+        </Pressable>
+        {isOpen ? (
+          <View>
+            <Text>Hello India</Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );
