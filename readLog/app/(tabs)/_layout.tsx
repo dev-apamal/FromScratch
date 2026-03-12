@@ -5,13 +5,13 @@ import { DynamicColorIOS } from "react-native";
 export default function TabLayout() {
   return (
     <NativeTabs
-      labelStyle={{
-        // For the text color
-        color: DynamicColorIOS({
-          dark: Colors.pomegranate[950],
-          light: Colors.pomegranate[950],
-        }),
-      }}
+      //   labelStyle={{
+      //     // For the text color
+      //     color: DynamicColorIOS({
+      //       dark: Colors.pomegranate[950],
+      //       light: Colors.pomegranate[950],
+      //     }),
+      //   }}
       // For the selected icon color
       tintColor={DynamicColorIOS({
         dark: Colors.pomegranate[500],
@@ -26,9 +26,17 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Icon sf="book.closed.fill" md="book" />
         <NativeTabs.Trigger.Label>Finished</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="search" role="search">
+      <NativeTabs.Trigger name="add">
+        <NativeTabs.Trigger.Label>Add Books</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="book.badge.plus.fill" md="add" />
+      </NativeTabs.Trigger>
+      {/* <NativeTabs.Trigger name="search" role="search">
         <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
         <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger> */}
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon sf="gearshape.fill" md="settings" />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

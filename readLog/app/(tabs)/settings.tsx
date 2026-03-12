@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
 
-export default function SearchView() {
+export default function Settings() {
   return (
     <View>
-      <Text>Hello Search</Text>
+      <Text>Hello Settings</Text>
     </View>
   );
 }
