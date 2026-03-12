@@ -1,5 +1,6 @@
 import { BookItem } from "@/types/bookItem";
 import { SymbolView } from "expo-symbols";
+import { useRouter } from "expo-router";
 import { View, Text, Image, Pressable } from "react-native";
 
 type Props = {
@@ -9,7 +10,19 @@ type Props = {
 };
 
 export default function BookCardView({ book, onUpdate, onDelete }: Props) {
+  const router = useRouter();
   const progress = book.currentPage / book.pageCount;
+
+  function handleUpdateProgress() {
+    router.push({
+      pathname: "./updateProgress/[id]",
+      params: {
+        id: book.id,
+        bookJson: JSON.stringify(book),
+      },
+    });
+    onUpdate();
+  }
 
   return (
     <View className="w-full">
@@ -62,7 +75,7 @@ export default function BookCardView({ book, onUpdate, onDelete }: Props) {
         {/* Buttons */}
         <View className="flex-row items-center gap-2">
           <Pressable
-            onPress={onUpdate}
+            onPress={handleUpdateProgress}
             className="flex-1 bg-white rounded-lg py-2 items-center"
           >
             <Text className="text-pomegranate-500 text-base">
