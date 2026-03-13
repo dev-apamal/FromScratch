@@ -2,11 +2,12 @@ import { BookItem } from "@/types/bookItem";
 import { getBookSessionData, saveSession } from "@/store/sessionStore";
 import { SessionItem } from "@/types/sessionItem";
 import { useSessionTimer } from "@/hooks/useSessionTimer";
+import { useFinishBook, useUpdateBookProgress } from "@/hooks/useShelf";
 import StatCard from "@/components/statCard";
 import PageStepper from "@/components/pageStepper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { Stack } from "expo-router";
 import formatDuration from "@/utils/formatDuration";
 
@@ -26,6 +27,9 @@ export default function UpdateProgressScreen() {
   const [currentPage, setCurrentPage] = useState(book.currentPage);
   const [totalTimeSeconds, setTotalTimeSeconds] = useState(0);
   const [pastSessions, setPastSessions] = useState<SessionItem[]>([]);
+
+  const { mutate: updateProgress } = useUpdateBookProgress();
+  const { mutate: finishBook } = useFinishBook();
 
   useEffect(() => {
     getBookSessionData(book.id).then((data) => {
@@ -61,6 +65,9 @@ export default function UpdateProgressScreen() {
     setTotalTimeSeconds(updated.totalTimeSeconds);
     setPastSessions(updated.sessions);
 
+    // Persist current page to SQLite
+    updateProgress({ id: book.id, currentPage });
+
     router.replace({
       pathname: "/sessionSummary",
       params: {
@@ -71,6 +78,25 @@ export default function UpdateProgressScreen() {
         readingPacePerHour: String(readingPacePerHour),
       },
     });
+  }
+
+  function handleFinishBook() {
+    Alert.alert(
+      "Finish this book?",
+      `Mark "${book.title}" as finished. This will move it to your Finished shelf.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, I finished it!",
+          onPress: () => {
+            if (isRunning) handleStop();
+            updateProgress({ id: book.id, currentPage: book.pageCount });
+            finishBook(book.id);
+            router.replace("/(tabs)/finished");
+          },
+        },
+      ],
+    );
   }
 
   // Derived stats
@@ -89,6 +115,7 @@ export default function UpdateProgressScreen() {
   return (
     <View className="flex-1 bg-pomegranate-50">
       <Stack.Screen options={{ headerShown: false }} />
+
       {/* Nav header */}
       <View className="pt-14 pb-3 px-4 flex-row items-center gap-3">
         <Pressable
@@ -109,13 +136,17 @@ export default function UpdateProgressScreen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-4 pb-36 gap-3"
+        contentContainerClassName="px-4 pb-44 gap-3"
         showsVerticalScrollIndicator={false}
       >
         {/* Book hero */}
         <View className="bg-pomegranate-300 rounded-2xl p-4 flex-row gap-4 items-center">
           <Image
-            source={book.imageName}
+            source={
+              book.coverUrl
+                ? { uri: book.coverUrl }
+                : require("@/assets/images/DummyBookCover.png")
+            }
             className="w-32 h-44 rounded-xl"
             resizeMode="cover"
           />
@@ -142,12 +173,10 @@ export default function UpdateProgressScreen() {
             flex
           />
         </View>
-
         <StatCard
           label="Total time with this book"
           value={formatDuration(totalTimeSeconds + sessionSeconds)}
         />
-
         <View className="flex-row gap-3">
           <StatCard
             label={"Pages read\nthis session"}
@@ -160,7 +189,6 @@ export default function UpdateProgressScreen() {
             flex
           />
         </View>
-
         <View className="flex-row gap-3">
           <StatCard
             label={"Pages left\nto finish"}
@@ -173,13 +201,11 @@ export default function UpdateProgressScreen() {
             flex
           />
         </View>
-
         <StatCard
           label="Total sessions logged"
           value={String(pastSessions.length)}
         />
 
-        {/* Page stepper — only visible while session is running */}
         {isRunning && (
           <PageStepper
             currentPage={currentPage}
@@ -196,29 +222,37 @@ export default function UpdateProgressScreen() {
       </ScrollView>
 
       {/* Bottom action bar */}
-      <View className="absolute bottom-0 left-0 right-0 px-4 pb-8 pt-3 bg-pomegranate-50 flex-row gap-3">
-        <Pressable
-          onPress={handleStart}
-          disabled={isRunning}
-          className={`flex-1 rounded-2xl py-4 items-center justify-center ${
-            isRunning ? "bg-pomegranate-100" : "bg-white"
-          }`}
-        >
-          <Text
-            className={`text-base font-semibold ${
-              isRunning ? "text-pomegranate-300" : "text-pomegranate-950"
+      <View className="absolute bottom-0 left-0 right-0 px-4 pb-8 pt-3 bg-pomegranate-50 gap-2">
+        <View className="flex-row gap-3">
+          <Pressable
+            onPress={handleStart}
+            disabled={isRunning}
+            className={`flex-1 rounded-2xl py-4 items-center justify-center ${
+              isRunning ? "bg-pomegranate-100" : "bg-white"
             }`}
           >
-            Start
-          </Text>
-        </Pressable>
-
+            <Text
+              className={`text-base font-semibold ${isRunning ? "text-pomegranate-300" : "text-pomegranate-950"}`}
+            >
+              Start
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={handleEndSession}
+            className="flex-1 rounded-2xl py-4 items-center justify-center bg-pomegranate-500"
+          >
+            <Text className="text-base font-semibold text-white">
+              End Session
+            </Text>
+          </Pressable>
+        </View>
+        {/* Finish book — always accessible */}
         <Pressable
-          onPress={handleEndSession}
-          className="flex-1 rounded-2xl py-4 items-center justify-center bg-pomegranate-500"
+          onPress={handleFinishBook}
+          className="w-full rounded-2xl py-3 items-center justify-center bg-pomegranate-100"
         >
-          <Text className="text-base font-semibold text-white">
-            End Session
+          <Text className="text-base font-semibold text-pomegranate-700">
+            ✓ Mark as Finished
           </Text>
         </Pressable>
       </View>

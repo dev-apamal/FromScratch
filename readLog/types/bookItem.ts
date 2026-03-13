@@ -1,11 +1,14 @@
 export type BookItem = {
-  id: string;
+  id: string; // olKey stripped of "/works/" e.g. "OL27258W"
+  olKey: string; // full "/works/OL27258W"
   title: string;
   author: string;
-  date: string;
   pageCount: number;
   currentPage: number;
   category: string;
-  status: string;
-  imageName: any; // require('../assets/...') or { uri: '...' }
+  status: "reading" | "finished";
+  coverUrl: string | null;
+  isbn: string | null;
+  addedAt: number; // unix ms timestamp
+  finishedAt: number | null;
 };

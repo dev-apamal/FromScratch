@@ -42,7 +42,11 @@ export default function SessionSummaryScreen() {
       >
         {/* Book cover */}
         <Image
-          source={book.imageName}
+          source={
+            book.coverUrl
+              ? { uri: book.coverUrl }
+              : require("@/assets/images/DummyBookCover.png")
+          }
           className="w-64 h-96 rounded-2xl"
           resizeMode="cover"
         />
