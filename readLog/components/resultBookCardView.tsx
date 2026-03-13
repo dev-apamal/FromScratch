@@ -1,11 +1,25 @@
 import { BookItem } from "@/types/bookItem";
+import { useState } from "react";
 import { View, Text, Image, Pressable } from "react-native";
 
 type Props = {
   book: BookItem;
+  alreadyOnShelf: boolean;
+  onAdd: () => void;
 };
 
-export default function ResultBookCardView({ book }: Props) {
+export default function ResultBookCardView({
+  book,
+  alreadyOnShelf,
+  onAdd,
+}: Props) {
+  const [added, setAdded] = useState(alreadyOnShelf);
+
+  function handleAdd() {
+    setAdded(true);
+    onAdd();
+  }
+
   return (
     <View className="w-full">
       <View className="bg-pomegranate-100 rounded-2xl p-4 w-full gap-4">
@@ -26,7 +40,7 @@ export default function ResultBookCardView({ book }: Props) {
               {book.title}
             </Text>
 
-            {/* Author / category / status */}
+            {/* Author / category */}
             <View className="gap-1">
               <Text className="text-sm text-pomegranate-950 opacity-80">
                 by {book.author}
@@ -34,11 +48,27 @@ export default function ResultBookCardView({ book }: Props) {
               <Text className="text-sm text-pomegranate-950 opacity-80">
                 {book.category}
               </Text>
-              {/* Add Text Saying Already Exist in the Currently Reading List if not a button that says add book */}
             </View>
+
+            {/* Add / Already on shelf */}
+            {added ? (
+              <View className="self-start bg-pomegranate-200 rounded-lg px-3 py-1.5">
+                <Text className="text-xs font-semibold text-pomegranate-700">
+                  ✓ Already on your shelf
+                </Text>
+              </View>
+            ) : (
+              <Pressable
+                onPress={handleAdd}
+                className="self-start bg-pomegranate-500 rounded-lg px-3 py-1.5 active:opacity-70"
+              >
+                <Text className="text-xs font-semibold text-white">
+                  + Add to shelf
+                </Text>
+              </Pressable>
+            )}
           </View>
         </View>
-        {/* Buttons */}
       </View>
     </View>
   );
