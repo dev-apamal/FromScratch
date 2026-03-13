@@ -10,6 +10,12 @@ import { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { Stack } from "expo-router";
 import formatDuration from "@/utils/formatDuration";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
 export default function UpdateProgressScreen() {
   const router = useRouter();
@@ -112,6 +118,22 @@ export default function UpdateProgressScreen() {
       ? Math.round((totalTimeSeconds + sessionSeconds) / totalSessions)
       : 0;
 
+  //Animated Progress Bar
+  const progressAnim = useSharedValue(
+    book.pageCount > 0 ? book.currentPage / book.pageCount : 0,
+  );
+  useEffect(() => {
+    const target = book.pageCount > 0 ? currentPage / book.pageCount : 0;
+    progressAnim.value = withTiming(Math.min(target, 1), {
+      duration: 500,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [currentPage]);
+
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressAnim.value * 100}%`,
+  }));
+  
   return (
     <View className="flex-1 bg-pomegranate-50">
       <Stack.Screen options={{ headerShown: false }} />

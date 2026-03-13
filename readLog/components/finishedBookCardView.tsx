@@ -1,24 +1,22 @@
 import { BookItem } from "@/types/bookItem";
 import { BookSessionData } from "@/types/sessionItem";
 import { getBookSessionData } from "@/store/sessionStore";
+import { useScalePress } from "@/hooks/useScalePress";
 import formatDate from "@/utils/formatDate";
 import formatDuration from "@/utils/formatDuration";
 import { useEffect, useState } from "react";
-import {
-  Image,
-  LayoutAnimation,
-  Platform,
-  Pressable,
-  Text,
-  UIManager,
-  View,
-} from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
 type Props = { book: BookItem; isOpen: boolean; onReveal: () => void };
 
-if (Platform.OS === "android") {
-  UIManager.setLayoutAnimationEnabledExperimental?.(true);
-}
+const STATS_MAX_HEIGHT = 320;
+const DURATION = 320;
 
 export default function FinishedBookCardView({
   book,
@@ -26,17 +24,36 @@ export default function FinishedBookCardView({
   onReveal,
 }: Props) {
   const [sessionData, setSessionData] = useState<BookSessionData | null>(null);
+  const btn = useScalePress(0.97);
+  const card = useScalePress(0.99);
+
+  const statsHeight = useSharedValue(0);
+  const statsOpacity = useSharedValue(0);
 
   useEffect(() => {
-    if (isOpen && !sessionData) {
-      getBookSessionData(book.id).then(setSessionData);
+    if (isOpen) {
+      statsHeight.value = withTiming(STATS_MAX_HEIGHT, {
+        duration: DURATION,
+        easing: Easing.out(Easing.cubic),
+      });
+      statsOpacity.value = withTiming(1, { duration: DURATION - 60 });
+      if (!sessionData) {
+        getBookSessionData(book.id).then(setSessionData);
+      }
+    } else {
+      statsHeight.value = withTiming(0, {
+        duration: DURATION - 40,
+        easing: Easing.in(Easing.cubic),
+      });
+      statsOpacity.value = withTiming(0, { duration: DURATION - 80 });
     }
   }, [isOpen]);
 
-  const handleReveal = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    onReveal();
-  };
+  const statsStyle = useAnimatedStyle(() => ({
+    maxHeight: statsHeight.value,
+    opacity: statsOpacity.value,
+    overflow: "hidden",
+  }));
 
   const avgSession =
     sessionData && sessionData.sessions.length > 0
@@ -44,7 +61,7 @@ export default function FinishedBookCardView({
       : 0;
 
   return (
-    <View className="w-full">
+    <Animated.View style={card.animatedStyle}>
       <View className="bg-pomegranate-100 rounded-2xl p-4 w-full gap-4 overflow-hidden">
         <View className="flex-row gap-4 items-start">
           <Image
@@ -90,17 +107,23 @@ export default function FinishedBookCardView({
           </View>
         </View>
 
-        <Pressable
-          onPress={handleReveal}
-          className="bg-white rounded-lg py-2 items-center"
-        >
-          <Text className="text-pomegranate-500 text-base">
-            {isOpen ? "Close Stats" : "View Stats"}
-          </Text>
-        </Pressable>
+        {/* Toggle button */}
+        <Animated.View style={btn.animatedStyle}>
+          <Pressable
+            onPress={onReveal}
+            onPressIn={btn.onPressIn}
+            onPressOut={btn.onPressOut}
+            className="bg-white rounded-lg py-2 items-center"
+          >
+            <Text className="text-pomegranate-500 text-base">
+              {isOpen ? "Close Stats" : "View Stats"}
+            </Text>
+          </Pressable>
+        </Animated.View>
 
-        {isOpen && (
-          <View className="gap-3">
+        {/* Animated stats panel */}
+        <Animated.View style={statsStyle}>
+          <View className="gap-3 pb-1">
             <View className="flex-row gap-3">
               <View className="flex-1 bg-pomegranate-200 rounded-xl p-3 gap-1">
                 <Text className="text-xs text-pomegranate-950 opacity-60">
@@ -138,8 +161,8 @@ export default function FinishedBookCardView({
               </View>
             </View>
           </View>
-        )}
+        </Animated.View>
       </View>
-    </View>
+    </Animated.View>
   );
 }

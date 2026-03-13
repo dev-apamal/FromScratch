@@ -1,3 +1,4 @@
+import AnimatedListItem from "@/components/animatedListItem";
 import EmptyShelfView from "@/components/emptyShelfView";
 import FinishedBookCardView from "@/components/finishedBookCardView";
 import { useFinishedBooks } from "@/hooks/useShelf";
@@ -41,15 +42,16 @@ export default function FinishedView() {
           Your Bookshelf
         </Text>
         <View className="gap-2">
-          {books.map((book) => (
-            <FinishedBookCardView
-              key={book.id}
-              book={book}
-              isOpen={openBookId === book.id}
-              onReveal={() =>
-                setOpenBookId((prev) => (prev === book.id ? null : book.id))
-              }
-            />
+          {books.map((book, index) => (
+            <AnimatedListItem key={book.id} index={index}>
+              <FinishedBookCardView
+                book={book}
+                isOpen={openBookId === book.id}
+                onReveal={() =>
+                  setOpenBookId((prev) => (prev === book.id ? null : book.id))
+                }
+              />
+            </AnimatedListItem>
           ))}
         </View>
       </View>

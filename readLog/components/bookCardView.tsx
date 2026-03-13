@@ -2,13 +2,32 @@ import { BookItem } from "@/types/bookItem";
 import formatDate from "@/utils/formatDate";
 import { SymbolView } from "expo-symbols";
 import { useRouter } from "expo-router";
-import { Image, Pressable, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Image, Pressable, Text, View } from "react-native";
 
 type Props = { book: BookItem; onUpdate: () => void; onDelete: () => void };
 
 export default function BookCardView({ book, onUpdate, onDelete }: Props) {
   const router = useRouter();
   const progress = book.pageCount > 0 ? book.currentPage / book.pageCount : 0;
+
+  // Animate from 0 → actual progress on mount
+  const animatedWidth = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(animatedWidth, {
+      toValue: progress,
+      duration: 600,
+      useNativeDriver: false, // width animation can't use native driver
+    }).start();
+  }, [progress]);
+
+  const progressBarStyle = {
+    width: animatedWidth.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0%", "100%"],
+    }),
+  };
 
   function handleUpdateProgress() {
     router.push({
@@ -79,10 +98,11 @@ export default function BookCardView({ book, onUpdate, onDelete }: Props) {
           </Pressable>
         </View>
 
-        <View className="h-1 bg-pomegranate-200 rounded-full overflow-hidden">
-          <View
-            className="h-full bg-rose-950 rounded-full"
-            style={{ width: `${Math.min(progress * 100, 100)}%` }}
+        {/* Animated progress bar */}
+        <View className="h-1.5 bg-pomegranate-200 rounded-full overflow-hidden">
+          <Animated.View
+            style={progressBarStyle}
+            className="h-full bg-pomegranate-500 rounded-full"
           />
         </View>
       </View>

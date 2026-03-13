@@ -3,7 +3,8 @@ import { useBookSearch, type SearchMode } from "@/hooks/useBookSearch";
 import { useAddBook, useShelfIds } from "@/hooks/useShelf";
 import { BookItem } from "@/types/bookItem";
 import { OLSearchResult } from "@/types/olSearchResult";
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -15,6 +16,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AnimatedListItem from "@/components/animatedListItem";
+
+const DEBOUNCE_MS = 500;
 
 function resultToBookItem(result: OLSearchResult): BookItem {
   return {
@@ -37,6 +41,8 @@ export default function AddBook() {
   const [mode, setMode] = useState<SearchMode>("title");
   const [inputValue, setInput] = useState("");
   const [searchQuery, setQuery] = useState("");
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     data: results = [],
@@ -48,19 +54,60 @@ export default function AddBook() {
   const { data: shelfIds = new Set<string>() } = useShelfIds();
   const { mutate: addBook } = useAddBook();
 
-  function handleSearch() {
+  // ── Reset everything when the tab loses focus ──────────────────────────────
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setInput("");
+        setQuery("");
+        setIsDebouncing(false);
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      };
+    }, []),
+  );
+
+  // ── Debounced live search ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
     const trimmed = inputValue.trim();
-    if (trimmed.length < 2) return;
-    setQuery(trimmed);
-  }
+
+    if (trimmed.length < 2) {
+      setIsDebouncing(false);
+      setQuery("");
+      return;
+    }
+
+    // Show a debouncing indicator immediately so the UI feels responsive
+    setIsDebouncing(true);
+
+    debounceTimer.current = setTimeout(() => {
+      setIsDebouncing(false);
+      setQuery(trimmed);
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [inputValue]);
 
   function handleModeSwitch(next: SearchMode) {
     setMode(next);
     setInput("");
     setQuery("");
+    setIsDebouncing(false);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }
+
+  function handleClear() {
+    setInput("");
+    setQuery("");
+    setIsDebouncing(false);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
   }
 
   const hasSearched = searchQuery.length >= 2;
+  const showSpinner = isDebouncing || isFetching;
 
   return (
     <SafeAreaView className="flex-1 bg-pomegranate-50">
@@ -110,45 +157,55 @@ export default function AddBook() {
 
               {/* Search bar */}
               <View className="flex-row gap-2 items-center">
-                <TextInput
-                  className="flex-1 bg-pomegranate-100 rounded-xl px-4 py-3 text-base text-pomegranate-950"
-                  placeholder={
-                    mode === "title"
-                      ? "Search by title or author…"
-                      : "Enter ISBN (e.g. 9780385472579)"
-                  }
-                  placeholderTextColor="#9b7b7b"
-                  value={inputValue}
-                  onChangeText={setInput}
-                  onSubmitEditing={handleSearch}
-                  returnKeyType="search"
-                  keyboardType={
-                    mode === "isbn" ? "numbers-and-punctuation" : "default"
-                  }
-                />
-                <Pressable
-                  onPress={handleSearch}
-                  className="bg-pomegranate-500 rounded-xl px-4 py-3"
-                >
-                  <Text className="text-white font-semibold text-base">
-                    Search
-                  </Text>
-                </Pressable>
+                <View className="flex-1 flex-row items-center bg-pomegranate-100 rounded-xl px-4 gap-2">
+                  <TextInput
+                    className="flex-1 py-3 text-base text-pomegranate-950"
+                    placeholder={
+                      mode === "title"
+                        ? "Search by title or author…"
+                        : "Enter ISBN (e.g. 9780385472579)"
+                    }
+                    placeholderTextColor="#9b7b7b"
+                    value={inputValue}
+                    onChangeText={setInput}
+                    returnKeyType="search"
+                    keyboardType={
+                      mode === "isbn" ? "numbers-and-punctuation" : "default"
+                    }
+                  />
+                  {/* Clear button — only shown when there's input */}
+                  {inputValue.length > 0 && (
+                    <Pressable
+                      onPress={handleClear}
+                      hitSlop={8}
+                      className="w-5 h-5 rounded-full bg-pomegranate-300 items-center justify-center"
+                    >
+                      <Text className="text-white text-xs font-bold leading-none">
+                        ✕
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
               </View>
 
               {/* Status line */}
-              {isFetching && (
-                <View className="items-center py-2">
-                  <ActivityIndicator color="#f45335" />
+              {showSpinner && (
+                <View className="flex-row items-center gap-2">
+                  <ActivityIndicator color="#f45335" size="small" />
+                  <Text className="text-sm text-pomegranate-950 opacity-50">
+                    {isDebouncing
+                      ? "Waiting for you to finish typing…"
+                      : "Searching…"}
+                  </Text>
                 </View>
               )}
-              {!!error && !isFetching && (
+              {!!error && !showSpinner && (
                 <Text className="text-sm text-red-500">
                   Could not reach Open Library. Check your connection and try
                   again.
                 </Text>
               )}
-              {isSuccess && !isFetching && hasSearched && (
+              {isSuccess && !showSpinner && hasSearched && (
                 <Text className="text-sm font-medium text-pomegranate-950 opacity-60">
                   {results.length === 0
                     ? "No books found."
@@ -157,12 +214,14 @@ export default function AddBook() {
               )}
             </View>
           }
-          renderItem={({ item }) => (
-            <ResultBookCardView
-              book={resultToBookItem(item)}
-              alreadyOnShelf={shelfIds.has(item.olKey.replace("/works/", ""))}
-              onAdd={() => addBook(resultToBookItem(item))}
-            />
+          renderItem={({ item, index }) => (
+            <AnimatedListItem index={index}>
+              <ResultBookCardView
+                book={item}
+                alreadyOnShelf={shelfIds.has(item.olKey.replace("/works/", ""))}
+                onAdd={() => addBook(resultToBookItem(item))}
+              />
+            </AnimatedListItem>
           )}
         />
       </KeyboardAvoidingView>

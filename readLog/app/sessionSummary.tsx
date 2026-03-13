@@ -1,8 +1,17 @@
 import { BookItem } from "@/types/bookItem";
 import StatCard from "@/components/statCard";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { Stack } from "expo-router";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 import formatDuration from "@/utils/formatDuration";
 
 function getSessionMessage(durationSeconds: number): string {
@@ -32,6 +41,49 @@ export default function SessionSummaryScreen() {
   const currentPage = Number(params.currentPage ?? book.currentPage);
   const readingPacePerHour = Number(params.readingPacePerHour ?? 0);
 
+  // ── Animation values ───────────────────────────────────────────────────────
+  const coverOpacity = useSharedValue(0);
+  const coverScale = useSharedValue(0.82);
+  const msgOpacity = useSharedValue(0);
+  const msgY = useSharedValue(12);
+  const statsOpacity = useSharedValue(0);
+  const statsY = useSharedValue(20);
+  const btnOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    // 1. Cover fades + springs in
+    coverOpacity.value = withTiming(1, { duration: 480 });
+    coverScale.value = withSpring(1, { damping: 14, stiffness: 100 });
+    // 2. Message slides up after cover lands
+    msgOpacity.value = withDelay(380, withTiming(1, { duration: 350 }));
+    msgY.value = withDelay(
+      380,
+      withTiming(0, { duration: 350, easing: Easing.out(Easing.cubic) }),
+    );
+    // 3. Stats rise after message
+    statsOpacity.value = withDelay(620, withTiming(1, { duration: 380 }));
+    statsY.value = withDelay(
+      620,
+      withTiming(0, { duration: 380, easing: Easing.out(Easing.cubic) }),
+    );
+    // 4. Continue button last
+    btnOpacity.value = withDelay(900, withTiming(1, { duration: 300 }));
+  }, []);
+
+  const coverStyle = useAnimatedStyle(() => ({
+    opacity: coverOpacity.value,
+    transform: [{ scale: coverScale.value }],
+  }));
+  const msgStyle = useAnimatedStyle(() => ({
+    opacity: msgOpacity.value,
+    transform: [{ translateY: msgY.value }],
+  }));
+  const statsStyle = useAnimatedStyle(() => ({
+    opacity: statsOpacity.value,
+    transform: [{ translateY: statsY.value }],
+  }));
+  const btnStyle = useAnimatedStyle(() => ({ opacity: btnOpacity.value }));
+
   return (
     <View className="flex-1 bg-pomegranate-50">
       <Stack.Screen options={{ headerShown: false }} />
@@ -41,23 +93,31 @@ export default function SessionSummaryScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Book cover */}
-        <Image
-          source={
-            book.coverUrl
-              ? { uri: book.coverUrl }
-              : require("@/assets/images/DummyBookCover.png")
-          }
-          className="w-64 h-96 rounded-2xl"
-          resizeMode="cover"
-        />
+        <Animated.View style={coverStyle}>
+          <Image
+            source={
+              book.coverUrl
+                ? { uri: book.coverUrl }
+                : require("@/assets/images/DummyBookCover.png")
+            }
+            className="w-64 h-96 rounded-2xl"
+            resizeMode="cover"
+          />
+        </Animated.View>
 
         {/* Headline */}
-        <Text className="text-2xl font-bold text-pomegranate-950 text-center">
+        <Animated.Text
+          style={msgStyle}
+          className="text-2xl font-bold text-pomegranate-950 text-center"
+        >
           {getSessionMessage(sessionSeconds)}
-        </Text>
+        </Animated.Text>
 
         {/* Stats grid */}
-        <View className="w-full gap-3">
+        <Animated.View
+          style={[statsStyle, { width: "100%" }]}
+          className="gap-3"
+        >
           <View className="flex-row gap-3">
             <StatCard
               label={"Pages read this\nsession"}
@@ -82,18 +142,21 @@ export default function SessionSummaryScreen() {
               flex
             />
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
 
       {/* Continue button */}
-      <View className="absolute bottom-0 left-0 right-0 px-5 pb-10 pt-3 bg-pomegranate-50">
+      <Animated.View
+        style={btnStyle}
+        className="absolute bottom-0 left-0 right-0 px-5 pb-10 pt-3 bg-pomegranate-50"
+      >
         <Pressable
           onPress={() => router.replace("./(tabs)/")}
-          className="w-full bg-pomegranate-500 rounded-full py-5 items-center"
+          className="w-full bg-pomegranate-500 rounded-full py-5 items-center active:opacity-80"
         >
           <Text className="text-white text-base font-semibold">Continue</Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </View>
   );
 }

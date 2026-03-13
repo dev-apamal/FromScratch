@@ -1,3 +1,4 @@
+import AnimatedListItem from "@/components/animatedListItem";
 import BookCardView from "@/components/bookCardView";
 import EmptyShelfView from "@/components/emptyShelfView";
 import { useReadingBooks, useRemoveBook } from "@/hooks/useShelf";
@@ -51,13 +52,14 @@ export default function ReadingNowView() {
           On My Shelf
         </Text>
         <View className="gap-2">
-          {books.map((book) => (
-            <BookCardView
-              key={book.id}
-              book={book}
-              onUpdate={() => {}}
-              onDelete={() => removeBook(book.id)}
-            />
+          {books.map((book, index) => (
+            <AnimatedListItem key={book.id} index={index}>
+              <BookCardView
+                book={book}
+                onUpdate={() => {}}
+                onDelete={() => removeBook(book.id)}
+              />
+            </AnimatedListItem>
           ))}
         </View>
       </View>
