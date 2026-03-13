@@ -33,16 +33,23 @@ function getAverageCoordinates(creators) {
   };
 }
 
-export default function CreatorMap({ creators }) {
+export default function CreatorMap({
+  creators,
+  hoveredCreatorId,
+  selectedCreatorId,
+  onSelectCreator,
+}) {
   const mapRef = useRef(null);
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const defaultView = useMemo(() => getAverageCoordinates(creators), [creators]);
-  const [selectedCreatorId, setSelectedCreatorId] = useState(creators[0]?.id ?? null);
   const [viewerLocation, setViewerLocation] = useState(null);
-  const selectedCreator = useMemo(
-    () => creators.find((creator) => creator.id === selectedCreatorId) ?? creators[0] ?? null,
-    [creators, selectedCreatorId]
-  );
+  const selectedCreator = useMemo(() => {
+    if (!selectedCreatorId) {
+      return null;
+    }
+
+    return creators.find((creator) => creator.id === selectedCreatorId) ?? null;
+  }, [creators, selectedCreatorId]);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -71,6 +78,19 @@ export default function CreatorMap({ creators }) {
     );
   }, []);
 
+  useEffect(() => {
+    if (!selectedCreator) {
+      return;
+    }
+
+    mapRef.current?.flyTo({
+      center: [selectedCreator.longitude, selectedCreator.latitude],
+      zoom: 10.5,
+      duration: 900,
+      essential: true,
+    });
+  }, [selectedCreator]);
+
   if (!mapboxToken) {
     return (
       <div className="rounded-[2rem] border border-dashed border-zinc-300 bg-white/70 p-6 text-sm leading-6 text-zinc-600">
@@ -81,13 +101,13 @@ export default function CreatorMap({ creators }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-[0_24px_80px_rgba(0,0,0,0.08)]">
+    <div className="h-full overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white shadow-[0_24px_80px_rgba(0,0,0,0.08)]">
       <Map
         ref={mapRef}
         initialViewState={defaultView}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
+        mapStyle="mapbox://styles/mapbox/light-v11"
         mapboxAccessToken={mapboxToken}
-        style={{ width: "100%", height: 560 }}
+        style={{ width: "100%", height: "100%" }}
       >
         <NavigationControl position="top-right" showCompass={false} />
 
@@ -106,8 +126,9 @@ export default function CreatorMap({ creators }) {
 
         <CreatorMapMarkers
           creators={creators}
-          onCloseCreator={() => setSelectedCreatorId(null)}
-          onSelectCreator={(creator) => setSelectedCreatorId(creator.id)}
+          hoveredCreatorId={hoveredCreatorId}
+          onCloseCreator={() => onSelectCreator(null)}
+          onSelectCreator={(creator) => onSelectCreator(creator.id)}
           selectedCreator={selectedCreator}
         />
       </Map>

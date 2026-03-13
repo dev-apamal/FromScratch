@@ -14,6 +14,7 @@ function formatAvailability(status) {
 
 export default function CreatorMapMarkers({
   creators,
+  hoveredCreatorId,
   selectedCreator,
   onSelectCreator,
   onCloseCreator,
@@ -22,6 +23,7 @@ export default function CreatorMapMarkers({
     <>
       {creators.map((creator) => {
         const isActive = selectedCreator?.id === creator.id;
+        const isHovered = hoveredCreatorId === creator.id;
 
         return (
           <Marker
@@ -32,15 +34,19 @@ export default function CreatorMapMarkers({
           >
             <button
               aria-label={`View ${creator.name}`}
-              className={`flex h-11 w-11 items-center justify-center rounded-full border-2 shadow-lg transition ${
+              className={`flex h-11 items-center justify-center rounded-full border-2 px-3 shadow-lg transition ${
                 isActive
-                  ? "border-zinc-950 bg-zinc-950 text-white"
-                  : "border-white bg-orange-500 text-white hover:bg-orange-400"
+                  ? "h-12 border-zinc-950 bg-zinc-950 text-white"
+                  : isHovered
+                    ? "h-12 border-orange-200 bg-orange-500 text-white ring-4 ring-orange-200/80"
+                    : "border-white bg-white text-zinc-950 hover:border-orange-200"
               }`}
               onClick={() => onSelectCreator(creator)}
               type="button"
             >
-              {creator.roles[0]?.slice(0, 1) || "C"}
+              <span className="text-sm font-semibold">
+                {creator.roles[0]?.slice(0, 1) || "C"}
+              </span>
             </button>
           </Marker>
         );
