@@ -28,9 +28,17 @@ export function useSessionTimer(): UseSessionTimerReturn {
     };
   }, [isRunning]);
 
+  // function handleStart() {
+  //   if (!isRunning) {
+  //     setSessionStartTime(Date.now());
+  //     setIsRunning(true);
+  //   }
+  // }
   function handleStart() {
     if (!isRunning) {
-      setSessionStartTime(Date.now());
+      if (sessionStartTime === null) {
+        setSessionStartTime(Date.now()); // only set on first start
+      }
       setIsRunning(true);
     }
   }

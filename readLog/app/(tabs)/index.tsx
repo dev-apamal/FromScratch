@@ -15,21 +15,19 @@ export default function ReadingNowView() {
       <ScrollView className="flex-1 bg-pomegranate-50">
         <View className="p-4 gap-6">
           <EmptyShelfView
-            title="Currently Reading"
+            title="Start Reading"
             subtitle={
               isLoading
                 ? "Loading your shelf…"
-                : "You haven't added any books yet. Start your reading journey!"
+                : "Pick a book to begin. Your current reads will appear here."
             }
           />
           {!isLoading && (
             <Pressable
               onPress={() => router.push("/(tabs)/add")}
-              className="bg-pomegranate-500 rounded-2xl py-4 items-center active:opacity-80"
+              className="bg-pomegranate-500 rounded-full py-3 items-center active:opacity-80"
             >
-              <Text className="text-white text-base font-semibold">
-                + Browse & Add Books
-              </Text>
+              <Text className="text-white text-base">+ Browse & Add Books</Text>
             </Pressable>
           )}
         </View>
@@ -57,7 +55,7 @@ export default function ReadingNowView() {
               <BookCardView
                 book={book}
                 onUpdate={() => {}}
-                onDelete={() => removeBook(book.id)}
+                onDelete={() => removeBook(book)}
               />
             </AnimatedListItem>
           ))}

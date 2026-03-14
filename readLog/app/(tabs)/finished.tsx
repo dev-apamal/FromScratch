@@ -1,12 +1,13 @@
 import AnimatedListItem from "@/components/animatedListItem";
 import EmptyShelfView from "@/components/emptyShelfView";
 import FinishedBookCardView from "@/components/finishedBookCardView";
-import { useFinishedBooks } from "@/hooks/useShelf";
+import { useFinishedBooks, useRemoveBook } from "@/hooks/useShelf";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 
 export default function FinishedView() {
   const { data: books = [], isLoading } = useFinishedBooks();
+  const { mutate: removeBook } = useRemoveBook();
   const [openBookId, setOpenBookId] = useState<string | null>(null);
 
   if (isLoading || books.length === 0) {
@@ -49,6 +50,20 @@ export default function FinishedView() {
                 isOpen={openBookId === book.id}
                 onReveal={() =>
                   setOpenBookId((prev) => (prev === book.id ? null : book.id))
+                }
+                onDelete={() =>
+                  Alert.alert(
+                    "Remove this book?",
+                    "This will delete your reading sessions and all progress for this book.",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Remove",
+                        style: "destructive",
+                        onPress: () => removeBook(book),
+                      },
+                    ],
+                  )
                 }
               />
             </AnimatedListItem>

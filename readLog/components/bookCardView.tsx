@@ -3,7 +3,8 @@ import formatDate from "@/utils/formatDate";
 import { SymbolView } from "expo-symbols";
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
-import { Animated, Image, Pressable, Text, View } from "react-native";
+import { Alert, Animated, Image, Pressable, Text, View } from "react-native";
+import capitalizeWords from "@/utils/capitalizeWords";
 
 type Props = { book: BookItem; onUpdate: () => void; onDelete: () => void };
 
@@ -45,15 +46,15 @@ export default function BookCardView({ book, onUpdate, onDelete }: Props) {
             source={
               book.coverUrl
                 ? { uri: book.coverUrl }
-                : require("@/assets/images/DummyBookCover.png")
+                : require("@/assets/images/DummyBookIcon.png")
             }
-            className="w-36 h-36 rounded-lg"
+            className="w-36 h-36 rounded-xl"
             resizeMode="cover"
           />
           <View className="flex-1 gap-2">
             <View className="flex-row justify-between">
               <Text className="text-xs text-pomegranate-950 opacity-60">
-                {formatDate(book.addedAt)}
+                {`Added on ${formatDate(book.addedAt)}`}
               </Text>
               <Text className="text-xs text-pomegranate-950 opacity-60">
                 {book.pageCount > 0
@@ -69,10 +70,10 @@ export default function BookCardView({ book, onUpdate, onDelete }: Props) {
             </Text>
             <View className="gap-1">
               <Text className="text-sm text-pomegranate-950 opacity-80">
-                by {book.author}
+                by {capitalizeWords(book.author)}
               </Text>
               <Text className="text-sm text-pomegranate-950 opacity-80">
-                {book.category}
+                {capitalizeWords(book.category)}
               </Text>
               <Text className="text-sm text-pomegranate-950 opacity-60">
                 {book.currentPage} / {book.pageCount} pages
@@ -84,22 +85,31 @@ export default function BookCardView({ book, onUpdate, onDelete }: Props) {
         <View className="flex-row items-center gap-2">
           <Pressable
             onPress={handleUpdateProgress}
-            className="flex-1 bg-white rounded-lg py-2 items-center"
+            className="bg-white rounded-full py-3 items-center active:opacity-80 flex-1"
           >
             <Text className="text-pomegranate-500 text-base">
               Update Progress
             </Text>
           </Pressable>
           <Pressable
-            onPress={onDelete}
-            className="bg-pomegranate-200 rounded-full p-2 items-center justify-center"
+            onPress={() =>
+              Alert.alert(
+                "Remove this book?",
+                "This will delete your reading sessions and all progress for this book.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Remove", style: "destructive", onPress: onDelete },
+                ],
+              )
+            }
+            className="bg-pomegranate-200 rounded-full p-3 items-center justify-center"
           >
             <SymbolView name="trash.fill" size={20} tintColor="#f45335" />
           </Pressable>
         </View>
 
         {/* Animated progress bar */}
-        <View className="h-1.5 bg-pomegranate-200 rounded-full overflow-hidden">
+        <View className="h-2 bg-pomegranate-200 rounded-full overflow-hidden">
           <Animated.View
             style={progressBarStyle}
             className="h-full bg-pomegranate-500 rounded-full"

@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/colors";
 import { View, Text } from "react-native";
 
 type Props = {
@@ -9,12 +10,24 @@ type Props = {
 export default function StatCard({ label, value, flex }: Props) {
   return (
     <View
-      className={`bg-pomegranate-100 rounded-2xl p-4 gap-1 ${flex ? "flex-1" : "w-full"}`}
+      className={`rounded-xl overflow-hidden ${flex ? "flex-1" : "w-full"}`}
+      style={{
+        backgroundColor: Colors.pomegranate[100],
+      }}
     >
-      <Text className="text-sm text-pomegranate-950 opacity-60 leading-snug">
-        {label}
-      </Text>
-      <Text className="text-2xl font-bold text-pomegranate-950">{value}</Text>
+      {/* Red top stripe */}
+      <View style={{ height: 4, backgroundColor: Colors.pomegranate[500] }} />
+
+      <View className="p-4 gap-2">
+        {/* Label */}
+        <Text className="text-xs uppercase text-pomegranate-950 opacity-80 tracking-widest">
+          {label}
+        </Text>
+        {/* Value */}
+        <Text className="text-xl font-medium text-pomegranate-950">
+          {value}
+        </Text>
+      </View>
     </View>
   );
 }

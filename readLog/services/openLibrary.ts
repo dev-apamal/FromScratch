@@ -1,9 +1,9 @@
+import { Tracker } from "@/services/analytics";
 import { OLSearchResult } from "@/types/olSearchResult";
 
 const BASE = "https://openlibrary.org";
 const COVERS = "https://covers.openlibrary.org";
 
-// Required by Open Library for apps making frequent calls
 const HEADERS: HeadersInit = {
   "User-Agent": "ReadLog/1.0 (contact@readlog.app)",
 };
@@ -22,7 +22,6 @@ function mapDoc(doc: any): OLSearchResult {
   const isbn = (doc.isbn as string[] | undefined)?.[0];
   const coverId = doc.cover_i as number | undefined;
   const subjects = doc.subject as string[] | undefined;
-
   return {
     olKey: doc.key as string,
     title: (doc.title as string) ?? "Unknown Title",
@@ -34,28 +33,92 @@ function mapDoc(doc: any): OLSearchResult {
   };
 }
 
-export async function searchByTitle(query: string): Promise<OLSearchResult[]> {
-  const params = new URLSearchParams({
-    title: query,
-    fields: SEARCH_FIELDS,
-    limit: "15",
-  });
-  const res = await fetch(`${BASE}/search.json?${params}`, {
-    headers: HEADERS,
-  });
-  if (!res.ok) throw new Error(`Open Library search failed (${res.status})`);
+export async function searchByTitle(
+  query: string,
+  track: Tracker,
+): Promise<OLSearchResult[]> {
+  const sanitizedQuery = query.trim().toLowerCase();
+  track("ol_search", { mode: "title", query: sanitizedQuery });
+
+  let res: Response;
+  try {
+    const params = new URLSearchParams({
+      title: query,
+      fields: SEARCH_FIELDS,
+      limit: "15",
+    });
+    res = await fetch(`${BASE}/search.json?${params}`, { headers: HEADERS });
+  } catch (networkError) {
+    track("ol_search_error", {
+      mode: "title",
+      query: sanitizedQuery,
+      status: 0,
+      reason: "network_failure",
+    });
+    throw networkError;
+  }
+
+  if (!res.ok) {
+    track("ol_search_error", {
+      mode: "title",
+      query: sanitizedQuery,
+      status: res.status,
+      reason: "http_error",
+    });
+    throw new Error(`Open Library search failed (${res.status})`);
+  }
+
   const data = await res.json();
-  return (data.docs as unknown[]).map(mapDoc);
+  const results = (data.docs as unknown[]).map(mapDoc);
+  track("ol_search_success", {
+    mode: "title",
+    query: sanitizedQuery,
+    resultCount: results.length,
+  });
+  return results;
 }
 
-export async function searchByISBN(isbn: string): Promise<OLSearchResult[]> {
-  const cleaned = isbn.replace(/[-\s]/g, "");
-  const params = new URLSearchParams({ isbn: cleaned, fields: SEARCH_FIELDS });
-  const res = await fetch(`${BASE}/search.json?${params}`, {
-    headers: HEADERS,
-  });
-  if (!res.ok)
+export async function searchByISBN(
+  isbn: string,
+  track: Tracker,
+): Promise<OLSearchResult[]> {
+  const sanitizedQuery = isbn.trim().toLowerCase();
+  track("ol_search", { mode: "isbn", query: sanitizedQuery });
+
+  let res: Response;
+  try {
+    const cleaned = isbn.replace(/[-\s]/g, "");
+    const params = new URLSearchParams({
+      isbn: cleaned,
+      fields: SEARCH_FIELDS,
+    });
+    res = await fetch(`${BASE}/search.json?${params}`, { headers: HEADERS });
+  } catch (networkError) {
+    track("ol_search_error", {
+      mode: "isbn",
+      query: sanitizedQuery,
+      status: 0,
+      reason: "network_failure",
+    });
+    throw networkError;
+  }
+
+  if (!res.ok) {
+    track("ol_search_error", {
+      mode: "isbn",
+      query: sanitizedQuery,
+      status: res.status,
+      reason: "http_error",
+    });
     throw new Error(`Open Library ISBN search failed (${res.status})`);
+  }
+
   const data = await res.json();
-  return (data.docs as unknown[]).map(mapDoc);
+  const results = (data.docs as unknown[]).map(mapDoc);
+  track("ol_search_success", {
+    mode: "isbn",
+    query: sanitizedQuery,
+    resultCount: results.length,
+  });
+  return results;
 }

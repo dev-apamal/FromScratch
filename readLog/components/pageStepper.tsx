@@ -7,6 +7,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useScalePress } from "@/hooks/useScalePress";
+import { SymbolView } from "expo-symbols";
+import { Colors } from "@/constants/colors";
 
 type Props = {
   currentPage: number;
@@ -14,6 +16,7 @@ type Props = {
   minPage: number;
   onIncrement: () => void;
   onDecrement: () => void;
+  isRunning: boolean;
 };
 
 export default function PageStepper({
@@ -22,6 +25,7 @@ export default function PageStepper({
   minPage,
   onIncrement,
   onDecrement,
+  isRunning,
 }: Props) {
   const inc = useScalePress(0.85);
   const dec = useScalePress(0.85);
@@ -40,8 +44,8 @@ export default function PageStepper({
   }));
 
   return (
-    <View className="bg-pomegranate-100 rounded-2xl p-4 gap-3">
-      <Text className="text-sm text-pomegranate-950 opacity-60">
+    <View className="bg-pomegranate-100 rounded-2xl p-4 border-t-4 border-t-pomegranate-500 gap-4">
+      <Text className="text-base text-pomegranate-950 opacity-80">
         Update current page
       </Text>
 
@@ -52,17 +56,25 @@ export default function PageStepper({
             onPress={onDecrement}
             onPressIn={dec.onPressIn}
             onPressOut={dec.onPressOut}
-            disabled={currentPage <= minPage}
-            className="w-10 h-10 rounded-full bg-pomegranate-200 items-center justify-center"
+            // disabled={currentPage <= minPage}
+            disabled={!isRunning || currentPage <= minPage}
+            className={`p-3 rounded-full bg-pomegranate-200 items-center justify-center ${
+              !isRunning ? "opacity-40" : "opacity-100"
+            }`}
           >
-            <Text className="text-pomegranate-950 text-xl font-bold">−</Text>
+            <SymbolView
+              name="minus"
+              size={16}
+              tintColor={Colors.pomegranate[500]}
+              weight="semibold"
+            />
           </Pressable>
         </Animated.View>
 
         {/* Animated page number */}
         <Animated.Text
           style={numStyle}
-          className="text-3xl font-bold text-pomegranate-950"
+          className="text-2xl font-bold text-pomegranate-950"
         >
           {currentPage}
         </Animated.Text>
@@ -73,10 +85,18 @@ export default function PageStepper({
             onPress={onIncrement}
             onPressIn={inc.onPressIn}
             onPressOut={inc.onPressOut}
-            disabled={currentPage >= pageCount}
-            className="w-10 h-10 rounded-full bg-pomegranate-200 items-center justify-center"
+            // disabled={currentPage >= pageCount}
+            disabled={!isRunning || currentPage >= pageCount}
+            className={`p-3 rounded-full bg-pomegranate-200 items-center justify-center ${
+              !isRunning ? "opacity-40" : "opacity-100"
+            }`}
           >
-            <Text className="text-pomegranate-950 text-xl font-bold">+</Text>
+            <SymbolView
+              name="plus"
+              size={16}
+              tintColor={Colors.pomegranate[500]}
+              weight="semibold"
+            />
           </Pressable>
         </Animated.View>
       </View>

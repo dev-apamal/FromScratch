@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import QueryProvider from "@/providers/queryProvider";
 import { initDB } from "@/db";
+import AnalyticsProvider from "@/providers/analyticsProvider";
 
 function SplashScreen() {
   const opacity = useState(new Animated.Value(0))[0];
@@ -33,23 +34,24 @@ function SplashScreen() {
         className="items-center gap-4"
       >
         {/* App icon */}
-        <View className="w-28 h-28 rounded-3xl bg-pomegranate-500 items-center justify-center shadow-lg">
-          <Image
-            source={require("../assets/images/icon.png")}
-            className="w-20 h-20"
-            resizeMode="contain"
-          />
-        </View>
+
+        <Image
+          source={require("../assets/images/Icon-Default.png")}
+          className="w-40 h-40"
+          resizeMode="contain"
+        />
 
         {/* App name */}
-        <Text className="text-5xl font-bold text-pomegranate-950 tracking-tight">
-          Nook
-        </Text>
+        <View className="flex items-center gap-1">
+          <Text className="text-2xl font-bold text-pomegranate-950 tracking-tight">
+            The Reading Nook
+          </Text>
 
-        {/* Tagline */}
-        <Text className="text-base text-pomegranate-950 opacity-50 font-medium">
-          your reading companion
-        </Text>
+          {/* Tagline */}
+          <Text className="text-sm text-pomegranate-950 opacity-80 font-medium tracking-tight">
+            Your Reading Companion
+          </Text>
+        </View>
       </Animated.View>
     </View>
   );
@@ -68,21 +70,18 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryProvider>
-      <SafeAreaProvider>
-        {!isReady ? (
-          <SplashScreen />
-        ) : (
-          <Stack>
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                headerShown: false,
-              }}
-            />
-          </Stack>
-        )}
-      </SafeAreaProvider>
-    </QueryProvider>
+    <AnalyticsProvider>
+      <QueryProvider>
+        <SafeAreaProvider>
+          {!isReady ? (
+            <SplashScreen />
+          ) : (
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          )}
+        </SafeAreaProvider>
+      </QueryProvider>
+    </AnalyticsProvider>
   );
 }

@@ -47,7 +47,7 @@ export default function ResultBookCardView({
           source={
             book.coverUrl
               ? { uri: book.coverUrl }
-              : require("@/assets/images/DummyBookCover.png")
+              : require("@/assets/images/DummyBookIcon.png")
           }
           className="w-24 h-32 rounded-lg"
           resizeMode="cover"

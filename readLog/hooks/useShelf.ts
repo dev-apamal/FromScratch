@@ -1,3 +1,4 @@
+import { useAnalytics } from "@/services/analytics";
 import { db } from "@/db";
 import { books } from "@/db/schema";
 import { BookItem } from "@/types/bookItem";
@@ -21,8 +22,6 @@ function rowToBook(row: typeof books.$inferSelect): BookItem {
   };
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
-
 export function useReadingBooks() {
   return useQuery({
     queryKey: ["books", "reading"],
@@ -33,7 +32,7 @@ export function useReadingBooks() {
         .where(eq(books.status, "reading"));
       return rows.map(rowToBook);
     },
-    staleTime: Infinity, // only refetch when we explicitly invalidate
+    staleTime: Infinity,
   });
 }
 
@@ -51,7 +50,6 @@ export function useFinishedBooks() {
   });
 }
 
-/** Returns Set of book IDs already on any shelf — used in search results */
 export function useShelfIds() {
   return useQuery({
     queryKey: ["books", "ids"],
@@ -63,10 +61,10 @@ export function useShelfIds() {
   });
 }
 
-// ── Mutations ────────────────────────────────────────────────────────────────
-
 export function useAddBook() {
   const qc = useQueryClient();
+  const { track } = useAnalytics();
+
   return useMutation({
     mutationFn: async (book: BookItem) => {
       await db.insert(books).values({
@@ -83,6 +81,11 @@ export function useAddBook() {
         addedAt: book.addedAt,
         finishedAt: book.finishedAt,
       });
+      track("book_added", {
+        olKey: book.olKey,
+        title: book.title,
+        hasCover: !!book.coverUrl,
+      });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
@@ -90,9 +93,12 @@ export function useAddBook() {
 
 export function useRemoveBook() {
   const qc = useQueryClient();
+  const { track } = useAnalytics();
+
   return useMutation({
-    mutationFn: async (id: string) => {
-      await db.delete(books).where(eq(books.id, id));
+    mutationFn: async (book: BookItem) => {
+      await db.delete(books).where(eq(books.id, book.id));
+      track("book_removed", { olKey: book.olKey, title: book.title });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
@@ -116,12 +122,20 @@ export function useUpdateBookProgress() {
 
 export function useFinishBook() {
   const qc = useQueryClient();
+  const { track } = useAnalytics();
+
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (book: BookItem) => {
       await db
         .update(books)
         .set({ status: "finished", finishedAt: Date.now() })
-        .where(eq(books.id, id));
+        .where(eq(books.id, book.id));
+      track("book_finished", {
+        olKey: book.olKey,
+        title: book.title,
+        totalSessions: 0, // you can pass real session count here if you want
+        totalTimeSeconds: 0,
+      });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });

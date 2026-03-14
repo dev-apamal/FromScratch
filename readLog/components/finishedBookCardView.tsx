@@ -6,14 +6,21 @@ import formatDate from "@/utils/formatDate";
 import formatDuration from "@/utils/formatDuration";
 import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
+import { SymbolView } from "expo-symbols";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import capitalizeWords from "@/utils/capitalizeWords";
 
-type Props = { book: BookItem; isOpen: boolean; onReveal: () => void };
+type Props = {
+  book: BookItem;
+  isOpen: boolean;
+  onReveal: () => void;
+  onDelete: () => void;
+};
 
 const STATS_MAX_HEIGHT = 320;
 const DURATION = 320;
@@ -22,10 +29,10 @@ export default function FinishedBookCardView({
   book,
   isOpen,
   onReveal,
+  onDelete,
 }: Props) {
   const [sessionData, setSessionData] = useState<BookSessionData | null>(null);
   const btn = useScalePress(0.97);
-  const card = useScalePress(0.99);
 
   const statsHeight = useSharedValue(0);
   const statsOpacity = useSharedValue(0);
@@ -61,16 +68,17 @@ export default function FinishedBookCardView({
       : 0;
 
   return (
-    <Animated.View style={card.animatedStyle}>
-      <View className="bg-pomegranate-100 rounded-2xl p-4 w-full gap-4 overflow-hidden">
+    <View className="w-full">
+      <View className="bg-pomegranate-100 rounded-2xl p-4 w-full gap-4">
+        {/* Top row — same as BookCardView */}
         <View className="flex-row gap-4 items-start">
           <Image
             source={
               book.coverUrl
                 ? { uri: book.coverUrl }
-                : require("@/assets/images/DummyBookCover.png")
+                : require("@/assets/images/DummyBookIcon.png")
             }
-            className="w-36 h-36 rounded-lg"
+            className="w-36 h-36 rounded-xl"
             resizeMode="cover"
           />
           <View className="flex-1 gap-2">
@@ -92,34 +100,44 @@ export default function FinishedBookCardView({
             </Text>
             <View className="gap-1">
               <Text className="text-sm text-pomegranate-950 opacity-80">
-                by {book.author}
+                by {capitalizeWords(book.author)}
               </Text>
               <Text className="text-sm text-pomegranate-950 opacity-80">
-                {book.category}
+                {capitalizeWords(book.category)}
               </Text>
               <View className="flex-row items-center gap-1">
-                <Text className="text-sm">✅</Text>
-                <Text className="text-sm text-pomegranate-950 opacity-80">
-                  Finished
-                </Text>
+                <Text className="text-sm text-pomegranate-500">Finished</Text>
+                <SymbolView
+                  name="checkmark.seal.fill"
+                  size={14}
+                  tintColor="#f45335"
+                />
               </View>
             </View>
           </View>
         </View>
 
-        {/* Toggle button */}
-        <Animated.View style={btn.animatedStyle}>
+        {/* Buttons row — same layout as BookCardView */}
+        <View className="flex-row items-center gap-2">
+          <Animated.View style={[btn.animatedStyle, { flex: 1 }]}>
+            <Pressable
+              onPress={onReveal}
+              onPressIn={btn.onPressIn}
+              onPressOut={btn.onPressOut}
+              className="bg-white rounded-full py-3 items-center active:opacity-80"
+            >
+              <Text className="text-pomegranate-500 text-base">
+                {isOpen ? "Close Stats" : "View Stats"}
+              </Text>
+            </Pressable>
+          </Animated.View>
           <Pressable
-            onPress={onReveal}
-            onPressIn={btn.onPressIn}
-            onPressOut={btn.onPressOut}
-            className="bg-white rounded-lg py-2 items-center"
+            onPress={onDelete}
+            className="bg-pomegranate-200 rounded-full p-3 items-center justify-center"
           >
-            <Text className="text-pomegranate-500 text-base">
-              {isOpen ? "Close Stats" : "View Stats"}
-            </Text>
+            <SymbolView name="trash.fill" size={20} tintColor="#f45335" />
           </Pressable>
-        </Animated.View>
+        </View>
 
         {/* Animated stats panel */}
         <Animated.View style={statsStyle}>
@@ -163,6 +181,6 @@ export default function FinishedBookCardView({
           </View>
         </Animated.View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
