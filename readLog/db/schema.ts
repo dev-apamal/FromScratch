@@ -18,5 +18,18 @@ export const books = sqliteTable("books", {
   finishedAt: integer("finished_at"),
 });
 
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  bookId: text("book_id").notNull(),
+  startTime: integer("start_time").notNull(),
+  endTime: integer("end_time").notNull(),
+  durationSeconds: integer("duration_seconds").notNull(),
+  pagesReadInSession: integer("pages_read_in_session").notNull(),
+  startPage: integer("start_page").notNull(),
+  endPage: integer("end_page").notNull(),
+});
+
 export type DbBook = typeof books.$inferSelect;
 export type InsertBook = typeof books.$inferInsert;
+export type DbSession = typeof sessions.$inferSelect;
+export type InsertSession = typeof sessions.$inferInsert;

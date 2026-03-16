@@ -4,14 +4,12 @@ const MIXPANEL_TOKEN = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN ?? "";
 
 export const mixpanel = new Mixpanel(MIXPANEL_TOKEN, true);
 
-// Track whether init has completed
 let isInitialized = false;
 
 export async function initAnalytics(): Promise<void> {
   try {
     await mixpanel.init();
     isInitialized = true;
-    console.log("[Analytics] Mixpanel initialized ✓");
   } catch (e) {
     console.error("[Analytics] Mixpanel init failed", e);
   }
@@ -74,19 +72,16 @@ export type AnalyticsEvent =
 
 export function useAnalytics(): { track: Tracker } {
   const track: Tracker = (event, properties) => {
-    // Always log in dev for visibility
-    console.log(`[Analytics] ${event}`, properties);
-
-    if (!isInitialized) {
-      console.warn(
-        "[Analytics] Mixpanel not initialized yet — event dropped:",
-        event,
-      );
+    // Dev-only logging so you can still verify events fire during development
+    if (__DEV__) {
+      console.log(`[Analytics] ${event}`, properties);
       return;
     }
 
-    // Send in both dev and prod so you can verify it works
-    // Once confirmed, wrap this in `if (!__DEV__)`
+    if (!isInitialized) {
+      return;
+    }
+
     mixpanel.track(event, properties);
   };
 

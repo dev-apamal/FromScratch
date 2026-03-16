@@ -1,6 +1,7 @@
 import { useAnalytics } from "@/services/analytics";
 import { db } from "@/db";
 import { books } from "@/db/schema";
+import { deleteBookSessions, getBookSessionData } from "@/store/sessionStore";
 import { BookItem } from "@/types/bookItem";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { eq } from "drizzle-orm";
@@ -97,6 +98,10 @@ export function useRemoveBook() {
 
   return useMutation({
     mutationFn: async (book: BookItem) => {
+      // Explicitly delete sessions first. The sessions table also has
+      // ON DELETE CASCADE so this is belt-and-suspenders, but being explicit
+      // guarantees cleanup even if FK enforcement is somehow not active.
+      await deleteBookSessions(book.id);
       await db.delete(books).where(eq(books.id, book.id));
       track("book_removed", { olKey: book.olKey, title: book.title });
     },
@@ -126,15 +131,20 @@ export function useFinishBook() {
 
   return useMutation({
     mutationFn: async (book: BookItem) => {
+      // Fetch real session data before updating status so analytics
+      // reflect actual reading history rather than hardcoded zeros
+      const sessionData = await getBookSessionData(book.id);
+
       await db
         .update(books)
         .set({ status: "finished", finishedAt: Date.now() })
         .where(eq(books.id, book.id));
+
       track("book_finished", {
         olKey: book.olKey,
         title: book.title,
-        totalSessions: 0, // you can pass real session count here if you want
-        totalTimeSeconds: 0,
+        totalSessions: sessionData.sessions.length,
+        totalTimeSeconds: sessionData.totalTimeSeconds,
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }),

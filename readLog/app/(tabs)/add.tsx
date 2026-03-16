@@ -1,4 +1,5 @@
 import ResultBookCardView from "@/components/resultBookCardView";
+import ErrorBoundary from "@/components/errorBoundary";
 import { useBookSearch, type SearchMode } from "@/hooks/useBookSearch";
 import { useAddBook, useShelfIds } from "@/hooks/useShelf";
 import { BookItem } from "@/types/bookItem";
@@ -37,7 +38,7 @@ function resultToBookItem(result: OLSearchResult): BookItem {
   };
 }
 
-export default function AddBook() {
+function AddBookContent() {
   const [mode, setMode] = useState<SearchMode>("title");
   const [inputValue, setInput] = useState("");
   const [searchQuery, setQuery] = useState("");
@@ -49,12 +50,12 @@ export default function AddBook() {
     isFetching,
     error,
     isSuccess,
+    refetch,
   } = useBookSearch(searchQuery, mode);
 
   const { data: shelfIds = new Set<string>() } = useShelfIds();
   const { mutate: addBook } = useAddBook();
 
-  // ── Reset everything when the tab loses focus ──────────────────────────────
   useFocusEffect(
     useCallback(() => {
       return () => {
@@ -66,7 +67,6 @@ export default function AddBook() {
     }, []),
   );
 
-  // ── Debounced live search ──────────────────────────────────────────────────
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
@@ -78,7 +78,6 @@ export default function AddBook() {
       return;
     }
 
-    // Show a debouncing indicator immediately so the UI feels responsive
     setIsDebouncing(true);
 
     debounceTimer.current = setTimeout(() => {
@@ -122,7 +121,6 @@ export default function AddBook() {
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <View className="gap-4 mb-2">
-              {/* Header */}
               <View className="gap-1">
                 <Text className="text-3xl font-bold text-pomegranate-950">
                   Add a Book
@@ -132,7 +130,6 @@ export default function AddBook() {
                 </Text>
               </View>
 
-              {/* Mode toggle */}
               <View className="flex-row w-full bg-pomegranate-100 rounded-full p-1 gap-1">
                 {(["title", "isbn"] as SearchMode[]).map((m) => (
                   <Pressable
@@ -155,28 +152,12 @@ export default function AddBook() {
                 ))}
               </View>
 
-              {/* Search bar */}
               <View className="flex-row w-full items-center justify-center bg-pomegranate-100 rounded-full px-4 py-3 gap-2">
-                {/* <TextInput
-                  className="flex-1 text-base text-pomegranate-950 border" // ← py-1 added
-                  placeholder={
-                    mode === "title"
-                      ? "Search by title or author…"
-                      : "Enter ISBN (e.g. 9780385472579)"
-                  }
-                  placeholderTextColor="#9b7b7b"
-                  value={inputValue}
-                  onChangeText={setInput}
-                  returnKeyType="search"
-                  keyboardType={
-                    mode === "isbn" ? "numbers-and-punctuation" : "default"
-                  }
-                /> */}
                 <TextInput
                   className="flex-1 text-base text-pomegranate-950"
                   multiline={true}
-                  numberOfLines={1} // keeps it single line visually
-                  scrollEnabled={false} // prevents internal scroll
+                  numberOfLines={1}
+                  scrollEnabled={false}
                   placeholder={
                     mode === "title"
                       ? "Search by title or author…"
@@ -203,7 +184,6 @@ export default function AddBook() {
                 )}
               </View>
 
-              {/* Status line */}
               {showSpinner && (
                 <View className="flex-row items-center gap-2">
                   <ActivityIndicator color="#f45335" size="small" />
@@ -214,12 +194,24 @@ export default function AddBook() {
                   </Text>
                 </View>
               )}
+
+              {/* Error state with retry button */}
               {!!error && !showSpinner && (
-                <Text className="text-sm text-red-500">
-                  Could not reach Open Library. Check your connection and try
-                  again.
-                </Text>
+                <View className="flex-row items-center justify-between gap-3">
+                  <Text className="flex-1 text-sm text-red-500">
+                    Could not reach Open Library. Check your connection.
+                  </Text>
+                  <Pressable
+                    onPress={() => refetch()}
+                    className="bg-pomegranate-100 rounded-full px-4 py-2"
+                  >
+                    <Text className="text-sm font-semibold text-pomegranate-700">
+                      Retry
+                    </Text>
+                  </Pressable>
+                </View>
               )}
+
               {isSuccess && !showSpinner && hasSearched && (
                 <Text className="text-sm font-medium text-pomegranate-950 opacity-60">
                   {results.length === 0
@@ -241,5 +233,13 @@ export default function AddBook() {
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+export default function AddBook() {
+  return (
+    <ErrorBoundary>
+      <AddBookContent />
+    </ErrorBoundary>
   );
 }
