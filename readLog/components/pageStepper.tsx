@@ -59,7 +59,9 @@ export default function PageStepper({
             // disabled={currentPage <= minPage}
             disabled={!isRunning || currentPage <= minPage}
             className={`p-3 rounded-full bg-pomegranate-200 items-center justify-center ${
-              !isRunning ? "opacity-40" : "opacity-100"
+              !isRunning || currentPage <= minPage
+                ? "opacity-40"
+                : "opacity-100"
             }`}
           >
             <SymbolView
@@ -88,7 +90,9 @@ export default function PageStepper({
             // disabled={currentPage >= pageCount}
             disabled={!isRunning || currentPage >= pageCount}
             className={`p-3 rounded-full bg-pomegranate-200 items-center justify-center ${
-              !isRunning ? "opacity-40" : "opacity-100"
+              !isRunning || currentPage <= minPage
+                ? "opacity-40"
+                : "opacity-100"
             }`}
           >
             <SymbolView

@@ -48,7 +48,7 @@ function SplashScreen() {
           </Text>
 
           {/* Tagline */}
-          <Text className="text-sm text-pomegranate-950 opacity-80 font-medium tracking-tight">
+          <Text className="text-base text-pomegranate-950 opacity-80 font-medium tracking-tight">
             Your Reading Companion
           </Text>
         </View>

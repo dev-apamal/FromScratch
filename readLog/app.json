@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "readLog",
-    "slug": "readLog",
+    "name": "The Reading Nook",
+    "slug": "thereadingnook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Icon-Default.png",

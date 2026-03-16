@@ -133,17 +133,17 @@ export default function AddBook() {
               </View>
 
               {/* Mode toggle */}
-              <View className="flex-row bg-pomegranate-100 rounded-xl p-1 gap-1">
+              <View className="flex-row w-full bg-pomegranate-100 rounded-full p-1 gap-1">
                 {(["title", "isbn"] as SearchMode[]).map((m) => (
                   <Pressable
                     key={m}
                     onPress={() => handleModeSwitch(m)}
-                    className={`flex-1 py-2 rounded-lg items-center ${
+                    className={`flex-1 py-2 rounded-full items-center ${
                       mode === m ? "bg-pomegranate-500" : ""
                     }`}
                   >
                     <Text
-                      className={`text-sm font-semibold ${
+                      className={`text-base font-semibold ${
                         mode === m
                           ? "text-white"
                           : "text-pomegranate-950 opacity-60"
@@ -156,36 +156,51 @@ export default function AddBook() {
               </View>
 
               {/* Search bar */}
-              <View className="flex-row gap-2 items-center">
-                <View className="flex-1 flex-row items-center bg-pomegranate-100 rounded-xl px-4 gap-2">
-                  <TextInput
-                    className="flex-1 py-3 text-base text-pomegranate-950"
-                    placeholder={
-                      mode === "title"
-                        ? "Search by title or author…"
-                        : "Enter ISBN (e.g. 9780385472579)"
-                    }
-                    placeholderTextColor="#9b7b7b"
-                    value={inputValue}
-                    onChangeText={setInput}
-                    returnKeyType="search"
-                    keyboardType={
-                      mode === "isbn" ? "numbers-and-punctuation" : "default"
-                    }
-                  />
-                  {/* Clear button — only shown when there's input */}
-                  {inputValue.length > 0 && (
-                    <Pressable
-                      onPress={handleClear}
-                      hitSlop={8}
-                      className="w-5 h-5 rounded-full bg-pomegranate-300 items-center justify-center"
-                    >
-                      <Text className="text-white text-xs font-bold leading-none">
-                        ✕
-                      </Text>
-                    </Pressable>
-                  )}
-                </View>
+              <View className="flex-row w-full items-center justify-center bg-pomegranate-100 rounded-full px-4 py-3 gap-2">
+                {/* <TextInput
+                  className="flex-1 text-base text-pomegranate-950 border" // ← py-1 added
+                  placeholder={
+                    mode === "title"
+                      ? "Search by title or author…"
+                      : "Enter ISBN (e.g. 9780385472579)"
+                  }
+                  placeholderTextColor="#9b7b7b"
+                  value={inputValue}
+                  onChangeText={setInput}
+                  returnKeyType="search"
+                  keyboardType={
+                    mode === "isbn" ? "numbers-and-punctuation" : "default"
+                  }
+                /> */}
+                <TextInput
+                  className="flex-1 text-base text-pomegranate-950"
+                  multiline={true}
+                  numberOfLines={1} // keeps it single line visually
+                  scrollEnabled={false} // prevents internal scroll
+                  placeholder={
+                    mode === "title"
+                      ? "Search by title or author…"
+                      : "Enter ISBN (e.g. 9780385472579)"
+                  }
+                  placeholderTextColor="#9b7b7b"
+                  value={inputValue}
+                  onChangeText={setInput}
+                  returnKeyType="search"
+                  keyboardType={
+                    mode === "isbn" ? "numbers-and-punctuation" : "default"
+                  }
+                />
+                {inputValue.length > 0 && (
+                  <Pressable
+                    onPress={handleClear}
+                    hitSlop={8}
+                    className="w-6 h-6 rounded-full bg-pomegranate-300 items-center justify-center"
+                  >
+                    <Text className="text-pomegranate-950 text-xs font-bold leading-none">
+                      ✕
+                    </Text>
+                  </Pressable>
+                )}
               </View>
 
               {/* Status line */}

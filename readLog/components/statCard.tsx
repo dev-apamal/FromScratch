@@ -5,14 +5,15 @@ type Props = {
   label: string;
   value: string;
   flex?: boolean;
+  bgColor?: string;
 };
 
-export default function StatCard({ label, value, flex }: Props) {
+export default function StatCard({ label, value, flex, bgColor }: Props) {
   return (
     <View
       className={`rounded-xl overflow-hidden ${flex ? "flex-1" : "w-full"}`}
       style={{
-        backgroundColor: Colors.pomegranate[100],
+        backgroundColor: bgColor ?? Colors.pomegranate[100],
       }}
     >
       {/* Red top stripe */}

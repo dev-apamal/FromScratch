@@ -121,14 +121,14 @@ export default function SettingsView() {
             onPress={() => console.log("Support")}
             showDivider
           />
-          <SettingsRow
+          {/* <SettingsRow
             type="toggle"
             symbolName="bell.fill"
             label="Receive Notification"
             value={notificationsEnabled}
             onToggle={setNotificationsEnabled}
             showDivider
-          />
+          /> */}
           <SettingsRow
             type="link"
             symbolName="questionmark.circle.fill"

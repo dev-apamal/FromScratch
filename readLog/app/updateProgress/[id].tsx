@@ -18,6 +18,7 @@ import {
 } from "react-native-reanimated";
 import { Colors } from "@/constants/colors";
 import { SymbolView } from "expo-symbols";
+import truncateTitle from "@/utils/truncateTitle";
 
 export default function UpdateProgressScreen() {
   const router = useRouter();
@@ -239,7 +240,8 @@ export default function UpdateProgressScreen() {
           headerTitle: () => (
             <View className="flex items-center">
               <Text className="text-lg font-bold text-pomegranate-950">
-                {book.title}
+                {/* {book.title} */}
+                {truncateTitle(book.title)}
               </Text>
               <Text className="text-sm text-pomegranate-950 opacity-60">
                 Update Progress

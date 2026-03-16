@@ -14,6 +14,8 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import capitalizeWords from "@/utils/capitalizeWords";
+import StatCard from "./statCard";
+import { Colors } from "@/constants/colors";
 
 type Props = {
   book: BookItem;
@@ -140,7 +142,7 @@ export default function FinishedBookCardView({
         </View>
 
         {/* Animated stats panel */}
-        <Animated.View style={statsStyle}>
+        {/* <Animated.View style={statsStyle}>
           <View className="gap-3 pb-1">
             <View className="flex-row gap-3">
               <View className="flex-1 bg-pomegranate-200 rounded-xl p-3 gap-1">
@@ -177,6 +179,38 @@ export default function FinishedBookCardView({
                   {formatDuration(avgSession)}
                 </Text>
               </View>
+            </View>
+          </View>
+        </Animated.View> */}
+        <Animated.View style={statsStyle}>
+          <View className="gap-3 pb-1">
+            <View className="flex-row gap-3">
+              <StatCard
+                label="Total sessions"
+                value={String(sessionData?.sessions.length ?? 0)}
+                flex
+                bgColor={Colors.pomegranate[200]}
+              />
+              <StatCard
+                label="Total reading time"
+                value={formatDuration(sessionData?.totalTimeSeconds ?? 0)}
+                flex
+                bgColor={Colors.pomegranate[200]}
+              />
+            </View>
+            <View className="flex-row gap-3">
+              <StatCard
+                label="Pages read"
+                value={String(book.pageCount)}
+                flex
+                bgColor={Colors.pomegranate[200]}
+              />
+              <StatCard
+                label="Avg session"
+                value={formatDuration(avgSession)}
+                flex
+                bgColor={Colors.pomegranate[200]}
+              />
             </View>
           </View>
         </Animated.View>

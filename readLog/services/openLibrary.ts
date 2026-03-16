@@ -5,7 +5,7 @@ const BASE = "https://openlibrary.org";
 const COVERS = "https://covers.openlibrary.org";
 
 const HEADERS: HeadersInit = {
-  "User-Agent": "ReadLog/1.0 (contact@readlog.app)",
+  "User-Agent": "ReadLog/1.0 (work.apamal@gmail.com)",
 };
 
 const SEARCH_FIELDS =
@@ -69,7 +69,10 @@ export async function searchByTitle(
   }
 
   const data = await res.json();
-  const results = (data.docs as unknown[]).map(mapDoc);
+  // const results = (data.docs as unknown[]).map(mapDoc);
+  const results = (data.docs as unknown[])
+    .map(mapDoc)
+    .filter((r) => r.pageCount > 0);
   track("ol_search_success", {
     mode: "title",
     query: sanitizedQuery,
@@ -114,7 +117,10 @@ export async function searchByISBN(
   }
 
   const data = await res.json();
-  const results = (data.docs as unknown[]).map(mapDoc);
+  // const results = (data.docs as unknown[]).map(mapDoc);
+  const results = (data.docs as unknown[])
+    .map(mapDoc)
+    .filter((r) => r.pageCount > 0);
   track("ol_search_success", {
     mode: "isbn",
     query: sanitizedQuery,
