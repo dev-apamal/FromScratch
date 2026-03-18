@@ -239,7 +239,7 @@ function SettingsContent() {
         </Text>
 
         <View className="bg-pomegranate-100 rounded-2xl overflow-hidden">
-          <SettingsRow
+          {/* <SettingsRow
             type="link"
             symbolName="person.2.fill"
             label="Refer a friend"
@@ -252,7 +252,7 @@ function SettingsContent() {
             label="Rate App"
             onPress={() => console.log("Rate App")}
             showDivider
-          />
+          /> */}
           <SettingsRow
             type="link"
             symbolName="envelope.fill"

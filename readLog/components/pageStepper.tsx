@@ -90,7 +90,7 @@ export default function PageStepper({
             // disabled={currentPage >= pageCount}
             disabled={!isRunning || currentPage >= pageCount}
             className={`p-3 rounded-full bg-pomegranate-200 items-center justify-center ${
-              !isRunning || currentPage <= minPage
+              !isRunning || currentPage >= pageCount
                 ? "opacity-40"
                 : "opacity-100"
             }`}

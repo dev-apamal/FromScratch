@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -18,6 +19,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AnimatedListItem from "@/components/animatedListItem";
+import { SymbolView } from "expo-symbols";
+import { Colors } from "@/constants/colors";
 
 const DEBOUNCE_MS = 500;
 
@@ -170,16 +173,22 @@ function AddBookContent() {
                   keyboardType={
                     mode === "isbn" ? "numbers-and-punctuation" : "default"
                   }
+                  onSubmitEditing={() => {
+                    Keyboard.dismiss();
+                    // handleSearch();
+                  }}
                 />
                 {inputValue.length > 0 && (
                   <Pressable
                     onPress={handleClear}
                     hitSlop={8}
-                    className="w-6 h-6 rounded-full bg-pomegranate-300 items-center justify-center"
+                    className="p-2 rounded-full bg-pomegranate-200 items-center justify-center"
                   >
-                    <Text className="text-pomegranate-950 text-xs font-bold leading-none">
-                      ✕
-                    </Text>
+                    <SymbolView
+                      name="xmark"
+                      size={16}
+                      tintColor={Colors.pomegranate[500]}
+                    />
                   </Pressable>
                 )}
               </View>
