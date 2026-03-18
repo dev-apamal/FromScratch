@@ -1,12 +1,6 @@
 "use client";
 
-const stackTags = [
-  "expo router",
-  "supabase",
-  "drizzle orm",
-  "zustand",
-  "nativewind",
-];
+const stackTags = ["expo router", "drizzle orm", "zustand", "nativewind"];
 
 const principles = [
   {
