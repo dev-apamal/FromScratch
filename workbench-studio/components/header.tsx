@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Header() {
   return (
     <>
@@ -5,9 +7,12 @@ export default function Header() {
         className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between py-6 fade-up"
         style={{ borderBottom: "1px solid var(--border)" }}
       >
-        <span className="text-sm font-medium tracking-wide">
-          the workbench<span style={{ color: "var(--accent)" }}>.studio</span>
-        </span>
+        <Link href="/">
+          <span className="text-sm font-medium tracking-wide">
+            the workbench<span style={{ color: "var(--accent)" }}>.studio</span>
+          </span>
+        </Link>
+
         <span
           className="text-xs tracking-widest"
           style={{ color: "var(--muted)" }}

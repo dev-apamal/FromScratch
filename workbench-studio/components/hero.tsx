@@ -19,7 +19,7 @@ export default function HeroSection() {
         <em style={{ color: "var(--accent)" }}>of building it.</em>
       </h1>
       <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-        the workbench is a collection of small software products — built
+        the workbench is a collection of small digital products — built
         independently, for no reason other than the enjoyment of designing and
         making things. some solve a real problem. some are just a better version
         of something that already exists. some exist purely because building

@@ -1,4 +1,5 @@
 import { footerLinks } from "@/data/footerLinks";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -6,9 +7,12 @@ export default function Footer() {
       className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-4 py-6 fade-up"
       style={{ animationDelay: "340ms" }}
     >
-      <p className="text-xs" style={{ color: "var(--muted)" }}>
-        © 2026 the workbench studio · bengaluru
-      </p>
+      <Link href="/">
+        <p className="text-xs" style={{ color: "var(--muted)" }}>
+          © 2026 the workbench studio · bengaluru
+        </p>
+      </Link>
+
       <div className="flex gap-5">
         {footerLinks.map(({ label, href }) => (
           <a

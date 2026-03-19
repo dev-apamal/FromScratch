@@ -158,7 +158,14 @@
 import ErrorBoundary from "@/components/errorBoundary";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
-import { Pressable, ScrollView, Switch, Text, View } from "react-native";
+import {
+  Linking,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type SettingsRowProps =
@@ -253,39 +260,42 @@ function SettingsContent() {
             onPress={() => console.log("Rate App")}
             showDivider
           /> */}
-          <SettingsRow
+          {/* <SettingsRow
             type="link"
             symbolName="envelope.fill"
             label="Contact Us"
             onPress={() => console.log("Contact Us")}
             showDivider
-          />
+          /> */}
           <SettingsRow
             type="link"
             symbolName="lifepreserver.fill"
             label="Support"
-            onPress={() => console.log("Support")}
-            showDivider
-          />
-          <SettingsRow
-            type="link"
-            symbolName="questionmark.circle.fill"
-            label="FAQ"
-            onPress={() => console.log("FAQ")}
+            onPress={() =>
+              Linking.openURL("mailto:support@theworkbench.studio")
+            }
             showDivider
           />
           <SettingsRow
             type="link"
             symbolName="doc.text.fill"
-            label="Terms of Use"
-            onPress={() => console.log("Terms of Use")}
+            label="Terms and Conditions"
+            onPress={() =>
+              Linking.openURL(
+                "https://theworkbench.studio/thereadingnook/terms-and-conditions",
+              )
+            }
             showDivider
           />
           <SettingsRow
             type="link"
             symbolName="lock.doc.fill"
             label="Privacy Policy"
-            onPress={() => console.log("Privacy Policy")}
+            onPress={() =>
+              Linking.openURL(
+                "https://theworkbench.studio/thereadingnook/privacy-policy",
+              )
+            }
           />
         </View>
       </ScrollView>

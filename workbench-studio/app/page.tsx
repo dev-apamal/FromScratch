@@ -18,22 +18,18 @@ export default function Home() {
         <Header />
         <HeroSection />
         <section
-          className="py-10 flex flex-col gap-3 fade-up"
+          className="py-10 flex flex-col fade-up"
           style={{
             animationDelay: "120ms",
             borderBottom: "1px solid var(--border)",
           }}
         >
-          <p
-            className="text-xs tracking-widest font-medium"
-            style={{ color: "var(--muted)" }}
-          >
-            the products
-          </p>
-          <Card />
+          <Card cardLink="/thereadingnook" />
         </section>
         <Ethos />
         <Process />
+        {/* CTA */}
+
         <About />
         <Footer />
       </div>

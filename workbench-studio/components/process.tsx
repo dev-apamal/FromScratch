@@ -21,7 +21,7 @@ export default function Process() {
       <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
         it all lives on{" "}
         <a
-          href="https://x.com"
+          href="https://x.com/akkarapurakkal"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors duration-150 hover:text-accent"
@@ -36,7 +36,7 @@ export default function Process() {
         </a>{" "}
         under{" "}
         <a
-          href="https://x.com"
+          href="https://x.com/akkarapurakkal"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors duration-150 hover:text-accent"
