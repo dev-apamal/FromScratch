@@ -5,7 +5,7 @@ const BASE = "https://openlibrary.org";
 const COVERS = "https://covers.openlibrary.org";
 
 const HEADERS: HeadersInit = {
-  "User-Agent": `${process.env.EXPO_PUBLIC_APP_NAME}/1.0 (${process.env.EXPO_PUBLIC_CONTACT_EMAIL})`,
+  "User-Agent": `The Reading Nook/1.0 (support@theworkbench.studio)`,
 };
 
 const SEARCH_FIELDS =
