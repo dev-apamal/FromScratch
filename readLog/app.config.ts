@@ -121,19 +121,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "@sentry/react-native/expo",
       {
         url: "https://sentry.io/",
-        project: "react-native",
-        organization: "design-by-ap",
-      },
-    ],
-    [
-      "@sentry/react-native/expo",
-      {
-        url: "https://sentry.io/",
         project: "the-reading-nook",
         organization: "design-by-ap",
       },
     ],
-    "@sentry/react-native",
   ],
   experiments: {
     typedRoutes: true,
