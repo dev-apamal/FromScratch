@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "LocumHiring",
-    "slug": "LocumHiring",
+    "name": "archana",
+    "slug": "archana",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "locumhiring",
+    "scheme": "archana",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -37,14 +37,6 @@
           "dark": {
             "backgroundColor": "#000000"
           }
-        }
-      ],
-      "expo-sqlite",
-      [
-        "react-native-maps",
-        {
-          "iosGoogleMapsApiKey": "YOUR_KEY_HERE",
-          "androidGoogleMapsApiKey": "YOUR_KEY_HERE"
         }
       ]
     ],
