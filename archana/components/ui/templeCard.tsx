@@ -1,7 +1,7 @@
 import { colors } from "@/constants/colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Image } from "expo-image";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View, StyleSheet } from "react-native";
 
 export type Temple = {
   id: string;
@@ -11,6 +11,7 @@ export type Temple = {
   location: string;
   distance: string;
   rating: number;
+  reviewCount?: number;
   openNow: boolean;
   timing: string;
   image?: string;
@@ -19,14 +20,86 @@ export type Temple = {
 const blurhash =
   "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
+const StarRating = ({ rating }: { rating: number }) => {
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating - fullStars >= 0.5;
+
+  return (
+    <View className="flex-row items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => {
+        const name =
+          i < fullStars
+            ? "star"
+            : i === fullStars && hasHalf
+              ? "star-half"
+              : "star-outline";
+        return <MaterialIcons key={i} name={name} size={12} color="#F59E0B" />;
+      })}
+    </View>
+  );
+};
+
 export default function TempleCard({ temple }: { temple: Temple }) {
   return (
-    <Pressable
-      className=" overflow-hidden border bg-gray-50"
-      style={{ borderColor: colors.border }}
-    >
-      {/* ── Image ── */}
-      <View className="h-40 relative">
+    <Pressable className="flex-row items-start gap-3 bg-gray-50 p-4">
+      <View className="flex-1 gap-1">
+        <Text
+          className="text-base font-semibold leading-snug mb-1"
+          style={{ color: colors.textPrimary }}
+          numberOfLines={2}
+        >
+          {temple.name}
+        </Text>
+
+        <View className="flex-row items-center gap-1">
+          <Text className="text-xs" style={{ color: colors.textPrimary }}>
+            {temple.rating.toFixed(1)}
+          </Text>
+          <StarRating rating={temple.rating} />
+          {temple.reviewCount && (
+            <Text className="text-xs" style={{ color: colors.textSecondary }}>
+              ({temple.reviewCount})
+            </Text>
+          )}
+        </View>
+
+        {/* Category · Location */}
+        <Text
+          className="text-xs leading-relaxed"
+          style={{ color: colors.textSecondary }}
+          numberOfLines={2}
+        >
+          {temple.category} · {temple.location}
+        </Text>
+
+        {/* Open/Closed · Timing */}
+        <View className="flex-row items-center gap-1">
+          <Text
+            className="text-xs font-medium"
+            style={{ color: temple.openNow ? "#16A34A" : "#DC2626" }}
+          >
+            {temple.openNow ? "Open" : "Closed"}
+          </Text>
+          <Text className="text-xs" style={{ color: colors.textSecondary }}>
+            · {temple.openNow ? "Closes" : "Opens"} {temple.timing}
+          </Text>
+        </View>
+
+        {/* Distance */}
+        <View className="flex-row items-center gap-1">
+          <MaterialIcons
+            name="near-me"
+            size={11}
+            color={colors.textSecondary}
+          />
+          <Text className="text-xs" style={{ color: colors.textSecondary }}>
+            {temple.distance}
+          </Text>
+        </View>
+      </View>
+
+      {/* ─── Right: Thumbnail ─── */}
+      <View className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
         <Image
           style={StyleSheet.absoluteFill}
           source={temple.image}
@@ -34,80 +107,6 @@ export default function TempleCard({ temple }: { temple: Temple }) {
           contentFit="cover"
           transition={400}
         />
-
-        {/* Badges row */}
-        <View className="absolute top-4 left-4 right-4 flex-row items-center justify-end">
-          <View
-            className="py-1 px-3 flex-row items-center gap-1"
-            style={{ backgroundColor: colors.background }}
-          >
-            <MaterialIcons name="star" size={12} color={colors.primary} />
-            <Text className="text-xs" style={{ color: colors.primary }}>
-              {temple.rating.toFixed(1)}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* ── Body ── */}
-      <View className="p-4">
-        <View className="flex-row justify-between items-center">
-          <Text
-            className="text-lg font-semibold mb-1"
-            style={{ color: colors.textPrimary }}
-            numberOfLines={2}
-          >
-            {temple.name}
-          </Text>
-          <View className="ml-auto">
-            <View
-              className={`py-1 px-3 ${
-                temple.openNow ? "bg-green-50" : "bg-red-50"
-              }`}
-            >
-              <Text
-                className={`text-xs ${
-                  temple.openNow ? "text-green-800" : "text-red-800"
-                }`}
-              >
-                {temple.openNow ? "Open Now" : "Closed"}
-              </Text>
-            </View>
-          </View>
-        </View>
-        <Text
-          className="text-xs mb-1"
-          style={{ color: colors.textSecondary }}
-          numberOfLines={1}
-        >
-          Deity: {temple.deity}
-          {"  ·  "}
-          {temple.location}
-        </Text>
-        {/* Meta row */}
-        <View className="flex-row items-center gap-4 mt-2">
-          <View className="flex-row items-center gap-1 justify-center">
-            <MaterialIcons
-              name="location-pin"
-              size={14}
-              color={colors.textPrimary}
-            />
-            <Text className="text-sm" style={{ color: colors.textPrimary }}>
-              {temple.distance}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center gap-1">
-            <MaterialIcons
-              name="access-time"
-              size={14}
-              color={colors.textPrimary}
-            />
-            <Text className="text-sm" style={{ color: colors.textPrimary }}>
-              {temple.timing}
-            </Text>
-          </View>
-        </View>
       </View>
     </Pressable>
   );

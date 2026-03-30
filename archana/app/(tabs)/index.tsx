@@ -16,13 +16,11 @@ export default function HomeScreen() {
     // default location is must and nearby needs to be tapped in.
   }
 
-  const blurhash =
-    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
-
   return (
     <SafeAreaView
       className="flex-1 p-4"
       style={{ backgroundColor: colors.background }}
+      edges={["top", "left", "right"]}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <DropdownButton
