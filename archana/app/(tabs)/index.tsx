@@ -1,20 +1,22 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+// app/(tabs)/index.tsx
+import { ScrollView } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import DropdownButton from "@/components/ui/dropdown";
 import SearchInput from "@/components/ui/searchInput";
-import { Image } from "expo-image";
 import CategoryList from "@/components/ui/categoryList";
 import TempleList from "@/components/ui/templeList";
+import { useLocationStore } from "@/store/locationStore";
+import { router } from "expo-router";
 
 export default function HomeScreen() {
   const [searchValue, setSearchValue] = useState("");
+  const selectedLocation = useLocationStore((state) => state.selectedLocation);
 
-  function handleLocation() {
-    // handle location logic
-    // default location is must and nearby needs to be tapped in.
-  }
+  const locationLabel = selectedLocation?.city ?? "Malappuram";
+  const locationAddress =
+    selectedLocation?.address ?? "23RP+4QG, NH 966, Up Hill, Malappuram";
 
   return (
     <SafeAreaView
@@ -24,13 +26,17 @@ export default function HomeScreen() {
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <DropdownButton
-          onLocationPress={handleLocation}
-          location="Malappuram"
-          address="23RP+4QG, NH 966, Up Hill, Malappuram" // Add limit here
+          // 🧠 router.push() navigates to the location page.
+          // Since we set presentation: "modal" in _layout.tsx,
+          // it slides up from the bottom — same feel as a sheet
+          // but with a full page and proper keyboard support.
+          onLocationPress={() => router.push("./location")}
+          location={locationLabel}
+          address={locationAddress}
         />
         <SearchInput value={searchValue} onChangeText={setSearchValue} />
         <CategoryList />
-        <TempleList />
+        <TempleList selectedLocation={selectedLocation} />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,6 +1,8 @@
+// components/ui/templeList.tsx
 import { colors } from "@/constants/colors";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import TempleCard, { Temple } from "@/components/ui/templeCard";
+import { SavedAddress } from "@/store/locationStore";
 
 const TEMPLES: Temple[] = [
   {
@@ -8,7 +10,7 @@ const TEMPLES: Temple[] = [
     name: "Thirunnavaya Navamukunda",
     deity: "Lord Vishnu",
     category: "Hindu",
-    location: "Thirunnavaya, Malappuram", // 👈 added
+    location: "Thirunnavaya, Malappuram",
     distance: "2.3 km",
     rating: 4.8,
     openNow: true,
@@ -19,7 +21,7 @@ const TEMPLES: Temple[] = [
     name: "Kottakkal Siva Temple",
     deity: "Lord Shiva",
     category: "Hindu",
-    location: "Kottakkal, Malappuram", // 👈 added
+    location: "Kottakkal, Malappuram",
     distance: "5.1 km",
     rating: 4.5,
     openNow: false,
@@ -30,7 +32,7 @@ const TEMPLES: Temple[] = [
     name: "Tirur Mundyamparambu Temple",
     deity: "Lord Murugan",
     category: "Hindu",
-    location: "Tirur, Malappuram", // 👈 added
+    location: "Tirur, Malappuram",
     distance: "7.8 km",
     rating: 4.6,
     openNow: true,
@@ -38,7 +40,18 @@ const TEMPLES: Temple[] = [
   },
 ];
 
-export default function TempleList() {
+type TempleListProps = {
+  selectedLocation: SavedAddress | null;
+};
+
+export default function TempleList({ selectedLocation }: TempleListProps) {
+  // 🧠 In a real app, you'd filter TEMPLES by distance from selectedLocation
+  // using the Haversine formula (calculates distance between two lat/lng points).
+  // For now we show all temples but update the header to reflect the city.
+  // This is a great next step to implement once you have real temple data
+  // with actual coordinates.
+  const city = selectedLocation?.city ?? "Malappuram";
+
   return (
     <View className="flex-1 gap-4">
       {/* Header */}
@@ -47,7 +60,7 @@ export default function TempleList() {
           className="text-base font-semibold"
           style={{ color: colors.textSecondary }}
         >
-          Temples near you
+          Temples near {city}
         </Text>
       </View>
 
@@ -63,7 +76,7 @@ export default function TempleList() {
             className="text-center text-base mt-8"
             style={{ color: colors.textSecondary }}
           >
-            No temples found nearby.
+            No temples found near {city}.
           </Text>
         )}
       />
