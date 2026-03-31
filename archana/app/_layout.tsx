@@ -39,6 +39,17 @@ export default function RootLayout() {
               // exactly where they'll go back to.
             }}
           />
+          <Stack.Screen
+            name="temple/[id]"
+            options={{
+              title: "",
+              // 🧠 Empty title — we set it dynamically once temple data loads.
+              // The [id] in the filename is a dynamic route segment —
+              // expo-router automatically extracts the id from the URL.
+              // e.g. /temple/abc-123 → params.id = "abc-123"
+              headerBackTitle: "Back",
+            }}
+          />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>
