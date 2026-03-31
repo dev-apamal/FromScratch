@@ -9,16 +9,16 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Image } from "expo-image";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { colors } from "@/constants/colors";
 import { fetchTempleById, TempleDetail, Pooja } from "@/services/templeService";
+import CartButton from "@/components/ui/cartButton";
 
 export default function TempleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
-
   const [temple, setTemple] = useState<TempleDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,8 +26,6 @@ export default function TempleDetailScreen() {
     const load = async () => {
       const data = await fetchTempleById(id);
       setTemple(data);
-      // 🧠 Set native header title dynamically once data loads —
-      // much better than showing "Temple Detail" as a placeholder.
       if (data) navigation.setOptions({ title: data.name });
       setIsLoading(false);
     };
@@ -85,8 +83,6 @@ export default function TempleDetailScreen() {
             >
               {temple.name}
             </Text>
-
-            {/* Rating */}
             <View className="flex-row items-center gap-2">
               <MaterialIcons name="star" size={16} color="#F59E0B" />
               <Text
@@ -114,8 +110,6 @@ export default function TempleDetailScreen() {
                 </Text>
               </View>
             </View>
-
-            {/* Address */}
             <View className="flex-row items-center gap-2">
               <MaterialIcons
                 name="location-on"
@@ -129,8 +123,6 @@ export default function TempleDetailScreen() {
                 {temple.address}
               </Text>
             </View>
-
-            {/* Timing */}
             {temple.open_time && temple.close_time && (
               <View className="flex-row items-center gap-2">
                 <MaterialIcons
@@ -146,14 +138,10 @@ export default function TempleDetailScreen() {
                 </Text>
               </View>
             )}
-
-            {/* Phone */}
             {temple.phone && (
               <Pressable
                 className="flex-row items-center gap-2"
                 onPress={() => Linking.openURL(`tel:${temple.phone}`)}
-                // 🧠 Linking.openURL with tel: opens the phone dialer
-                // directly — one tap to call the temple.
               >
                 <MaterialIcons name="phone" size={16} color={colors.primary} />
                 <Text className="text-sm" style={{ color: colors.primary }}>
@@ -191,7 +179,12 @@ export default function TempleDetailScreen() {
                 Poojas & Pricing
               </Text>
               {temple.poojas.map((pooja) => (
-                <PoojaRow key={pooja.id} pooja={pooja} />
+                <PoojaRow
+                  key={pooja.id}
+                  pooja={pooja}
+                  templeId={temple.id}
+                  templeName={temple.name}
+                />
               ))}
             </View>
           )}
@@ -293,25 +286,45 @@ export default function TempleDetailScreen() {
               ))}
             </View>
           )}
+
+          <View className="h-24" />
         </View>
       </ScrollView>
+
+      {/* Floating cart button */}
+      <View
+        className="absolute bottom-6 left-0 right-0 items-center"
+        pointerEvents="box-none"
+      >
+        <CartButton />
+      </View>
     </SafeAreaView>
   );
 }
 
-// ─── Pooja Row Component ──────────────────────────────────────────────────────
-// 🧠 Small components like this are extracted to keep the main
-// component readable. PoojaRow is only used here so it lives
-// in the same file — no need to create a separate file for it.
-function PoojaRow({ pooja }: { pooja: Pooja }) {
+// ─── Pooja Row ────────────────────────────────────────────────────────────────
+// 🧠 Replaced "Book Now" full-width button with a compact + button.
+// The row now just shows info + price on the left and a circle + on the right.
+// This is cleaner — the pooja list doesn't look like a checkout page anymore,
+// it looks like a menu. The + is universally understood as "add".
+function PoojaRow({
+  pooja,
+  templeId,
+  templeName,
+}: {
+  pooja: Pooja;
+  templeId: string;
+  templeName: string;
+}) {
   return (
     <View
-      className="flex-row items-center justify-between p-4 border"
+      className="flex-row items-center justify-between border p-4 gap-3"
       style={{ borderColor: colors.border }}
     >
+      {/* Left: Info */}
       <View className="flex-1 gap-1">
         <Text
-          className="text-sm font-medium"
+          className="text-sm font-semibold"
           style={{ color: colors.textPrimary }}
         >
           {pooja.name}
@@ -337,18 +350,49 @@ function PoojaRow({ pooja }: { pooja: Pooja }) {
             </Text>
           </View>
         )}
+        <Text
+          className="text-sm font-bold mt-1"
+          style={{ color: colors.primary }}
+        >
+          ₹{pooja.price.toLocaleString("en-IN")}
+          <Text
+            className="text-xs font-normal"
+            style={{ color: colors.textSecondary }}
+          >
+            {" "}
+            / devotee
+          </Text>
+        </Text>
       </View>
 
-      <View className="items-end gap-2 ml-4">
-        <Text className="text-base font-bold" style={{ color: colors.primary }}>
-          ₹{pooja.price.toLocaleString("en-IN")}
+      {/* Right: + button or Unavailable */}
+      {pooja.is_available ? (
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: "/temple/pooja/[id]",
+              params: {
+                id: pooja.id,
+                templeId,
+                templeName,
+                poojaName: pooja.name,
+                price: pooja.price,
+              },
+            })
+          }
+          // 🧠 Circle + button — compact, universally understood as "add".
+          // We use hitSlop to make it easier to tap on mobile.
+          className="w-10 h-10 rounded-full items-center justify-center"
+          style={{ backgroundColor: colors.primary }}
+          hitSlop={8}
+        >
+          <MaterialIcons name="add" size={22} color="white" />
+        </Pressable>
+      ) : (
+        <Text className="text-xs" style={{ color: colors.textSecondary }}>
+          Unavailable
         </Text>
-        {!pooja.is_available && (
-          <Text className="text-xs" style={{ color: colors.error }}>
-            Unavailable
-          </Text>
-        )}
-      </View>
+      )}
     </View>
   );
 }

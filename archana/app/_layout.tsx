@@ -3,14 +3,16 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useEffect } from "react";
 import { useLocationStore } from "@/store/locationStore";
+import { useCartStore } from "@/store/cartStore";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../global.css";
 
 export default function RootLayout() {
-  const hydrate = useLocationStore((state) => state.hydrate);
+  const hydrateLocation = useLocationStore((state) => state.hydrate);
+  const hydrateCart = useCartStore((state) => state.hydrate);
 
   useEffect(() => {
-    hydrate();
+    Promise.all([hydrateLocation(), hydrateCart()]);
   }, []);
 
   return (
@@ -18,37 +20,28 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          {/* 🧠 This registers the location page as a stack screen.
-              presentation: "modal" gives it the iOS modal slide-up
-              animation — feels native without any extra work.
-              headerShown: false because we build our own header. */}
           <Stack.Screen
             name="location"
-            options={{
-              presentation: "modal",
-              title: "Select Location",
-            }}
+            options={{ presentation: "modal", title: "Select Location" }}
           />
           <Stack.Screen
             name="search"
-            options={{
-              title: "Search Results",
-              headerBackTitle: "Home",
-              // 🧠 headerBackTitle sets the back button label on iOS —
-              // instead of just "<" it shows "< Home" so the user knows
-              // exactly where they'll go back to.
-            }}
+            options={{ title: "Search Results", headerBackTitle: "Home" }}
           />
           <Stack.Screen
             name="temple/[id]"
-            options={{
-              title: "",
-              // 🧠 Empty title — we set it dynamically once temple data loads.
-              // The [id] in the filename is a dynamic route segment —
-              // expo-router automatically extracts the id from the URL.
-              // e.g. /temple/abc-123 → params.id = "abc-123"
-              headerBackTitle: "Back",
-            }}
+            options={{ title: "", headerBackTitle: "Back" }}
+          />
+          <Stack.Screen
+            name="temple/pooja/[id]"
+            options={{ title: "", headerBackTitle: "Back" }}
+          />
+          {/* 🧠 Cart is now a regular full screen push — no modal.
+              This gives us full SafeAreaView control and feels more
+              like a proper checkout page than a floating sheet. */}
+          <Stack.Screen
+            name="cart"
+            options={{ title: "Your Cart", headerBackTitle: "Back" }}
           />
         </Stack>
       </SafeAreaProvider>
