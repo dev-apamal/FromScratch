@@ -18,6 +18,27 @@ export default function HomeScreen() {
   const locationAddress =
     selectedLocation?.address ?? "23RP+4QG, NH 966, Up Hill, Malappuram";
 
+  const handleSearchChange = (text: string) => {
+    setSearchValue(text);
+
+    if (text.trim().length === 1) {
+      // 🧠 We navigate on the FIRST character typed — not on submit.
+      // length === 1 means this is the exact moment the user starts typing.
+      // We use router.push() with the query so the search page
+      // gets the initial character immediately and shows a loading state.
+      // From that point on, the search page owns the search state —
+      // the user is typing directly into the search input on THAT page,
+      // not this one. So we clear the home screen input after navigating.
+      router.push({
+        pathname: "/search",
+        params: { query: text.trim() },
+      });
+      setSearchValue("");
+      // 🧠 We reset searchValue to "" here so next time the user
+      // comes back to home and taps search, it starts fresh.
+    }
+  };
+
   return (
     <SafeAreaView
       className="flex-1 p-4"
@@ -26,15 +47,16 @@ export default function HomeScreen() {
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <DropdownButton
-          // 🧠 router.push() navigates to the location page.
-          // Since we set presentation: "modal" in _layout.tsx,
-          // it slides up from the bottom — same feel as a sheet
-          // but with a full page and proper keyboard support.
-          onLocationPress={() => router.push("./location")}
+          onLocationPress={() => router.push("/location")}
           location={locationLabel}
           address={locationAddress}
         />
-        <SearchInput value={searchValue} onChangeText={setSearchValue} />
+        <SearchInput
+          value={searchValue}
+          onChangeText={handleSearchChange}
+          // 🧠 No onSubmit needed anymore — navigation happens
+          // on first keystroke via handleSearchChange above.
+        />
         <CategoryList />
         <TempleList selectedLocation={selectedLocation} />
       </ScrollView>

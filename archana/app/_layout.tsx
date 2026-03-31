@@ -29,6 +29,16 @@ export default function RootLayout() {
               title: "Select Location",
             }}
           />
+          <Stack.Screen
+            name="search"
+            options={{
+              title: "Search Results",
+              headerBackTitle: "Home",
+              // 🧠 headerBackTitle sets the back button label on iOS —
+              // instead of just "<" it shows "< Home" so the user knows
+              // exactly where they'll go back to.
+            }}
+          />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>
