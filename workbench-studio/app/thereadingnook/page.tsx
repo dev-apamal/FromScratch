@@ -4,6 +4,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Link from "next/link";
 import { footerLinks } from "@/data/footerLinks";
+import Image from "next/image";
 
 const features = [
   {
@@ -159,7 +160,7 @@ export default function TheReadingNookPage() {
           >
             status
           </p>
-          <p className="text-sm font-medium">in development.</p>
+          <p className="text-sm font-medium">v1 out in Apple App Store</p>
           <p
             className="text-sm leading-relaxed"
             style={{ color: "var(--muted)" }}
@@ -184,6 +185,19 @@ export default function TheReadingNookPage() {
           </p>
           <div className="flex flex-wrap gap-3 pt-1">
             <Link
+              href="https://apps.apple.com/in/app/the-reading-nook/id6760889399"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium px-4 py-2.5 transition-colors duration-150"
+              style={{
+                background: "#000",
+                color: "#fff",
+                display: "inline-block",
+              }}
+            >
+              Download on Apple App Store
+            </Link>
+            <Link
               href={footerLinks[0].href}
               target="_blank"
               rel="noopener noreferrer"
@@ -196,6 +210,7 @@ export default function TheReadingNookPage() {
             >
               follow the build
             </Link>
+
             <Link
               href="/"
               className="text-sm font-medium px-4 py-2.5 transition-colors duration-150 hover:text-accent"
